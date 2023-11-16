@@ -21,8 +21,8 @@ import { useLocation, Route, Routes, Navigate } from "react-router-dom";
 import { Container, Row, Col } from "reactstrap";
 
 // core components
-import AuthNavbar from "components/Navbars/AuthNavbar.js";
-import AuthFooter from "components/Footers/AuthFooter.js";
+// import AuthNavbar from "components/Navbars/AuthNavbar.js";
+// import AuthFooter from "components/Footers/AuthFooter.js";
 
 import routes from "routes.js";
 
@@ -36,6 +36,8 @@ const Auth = (props) => {
       document.body.classList.remove("bg-default");
     };
   }, []);
+
+
   React.useEffect(() => {
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
@@ -87,6 +89,7 @@ const Auth = (props) => {
             </svg>
           </div>
         </div>
+        
         {/* Page content */}
         <Container className="mt--8 pb-5">
           <Row className="justify-content-center">

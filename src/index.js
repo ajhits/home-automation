@@ -32,8 +32,10 @@ root.render(
   <BrowserRouter>
     <Routes>
       <Route path="/admin/*" element={<AdminLayout />} />
+
       <Route path="/auth/*" element={<AuthLayout />} />
-      <Route path="*" element={<Navigate to="/admin/index" replace />} />
+      
+      <Route path="*" element={<Navigate to="/auth" replace />} />
     </Routes>
   </BrowserRouter>
 );

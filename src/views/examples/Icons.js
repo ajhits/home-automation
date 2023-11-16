@@ -7,7 +7,7 @@ import {
   Row,
   Col,
   Button,
-  UncontrolledTooltip,
+  // UncontrolledTooltip,
 } from "reactstrap";
 import Header from "components/Headers/Header.js";
 
