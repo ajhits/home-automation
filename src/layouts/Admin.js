@@ -30,6 +30,7 @@ const Admin = (props) => {
   const mainContent = React.useRef(null);
   const location = useLocation();
 
+
   React.useEffect(() => {
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
@@ -48,16 +49,12 @@ const Admin = (props) => {
     });
   };
 
-  const getBrandText = (path) => {
-    for (let i = 0; i < routes.length; i++) {
-      if (
-        props?.location?.pathname.indexOf(routes[i].layout + routes[i].path) !==
-        -1
-      ) {
-        return routes[i].name;
-      }
-    }
-    return "Brand";
+  const getBrandText = () => {
+
+    const filteredPathname = location.pathname.replace('/admin', '');
+    const matchingRoute = routes.find((route) => route.path === filteredPathname);
+
+    return matchingRoute ? matchingRoute.name : null;
   };
 
   return (
@@ -71,12 +68,15 @@ const Admin = (props) => {
           imgAlt: "...",
         }}
       />
+
       <div className="main-content" ref={mainContent}>
+
         <AdminNavbar
           {...props}
-          brandText={getBrandText(props?.location?.pathname)}
+          brandText={getBrandText(props)}
         />
         
+
         <Routes>
           {getRoutes(routes)}
           <Route path="*" element={<Navigate to="/admin/index" replace />} />

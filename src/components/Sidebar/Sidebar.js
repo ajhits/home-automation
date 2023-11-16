@@ -20,6 +20,7 @@ import { useState } from "react";
 import { NavLink as NavLinkRRD, Link } from "react-router-dom";
 // nodejs library to set properties for components
 import { PropTypes } from "prop-types";
+import { LogoutSession } from "../../firebase/Authentication";
 
 // reactstrap components
 import {
@@ -56,21 +57,28 @@ var ps;
 
 const Sidebar = (props) => {
   const [collapseOpen, setCollapseOpen] = useState();
+
   // verifies if routeName is the one active (in browser input)
   const activeRoute = (routeName) => {
     return props.location.pathname.indexOf(routeName) > -1 ? "active" : "";
   };
+
   // toggles collapse between opened and closed (true/false)
   const toggleCollapse = () => {
     setCollapseOpen((data) => !data);
   };
+  
   // closes the collapse
   const closeCollapse = () => {
     setCollapseOpen(false);
   };
+
   // creates the links that appear in the left menu / Sidebar
   const createLinks = (routes) => {
-    return routes.map((prop, key) => {
+    // Filter out the route with path "/login"
+    const filteredRoutes = routes.filter((prop) => prop.path !== "/login");
+  
+    return filteredRoutes.map((prop, key) => {
       return (
         <NavItem key={key}>
           <NavLink
@@ -85,9 +93,12 @@ const Sidebar = (props) => {
       );
     });
   };
+  
 
   const { bgColor, routes, logo } = props;
+
   let navbarBrandProps;
+
   if (logo && logo.innerLink) {
     navbarBrandProps = {
       to: logo.innerLink,
@@ -107,6 +118,7 @@ const Sidebar = (props) => {
       id="sidenav-main"
     >
       <Container fluid>
+
         {/* Toggler */}
         <button
           className="navbar-toggler"
@@ -115,6 +127,7 @@ const Sidebar = (props) => {
         >
           <span className="navbar-toggler-icon" />
         </button>
+
         {/* Brand */}
         {logo ? (
           <NavbarBrand className="pt-0" {...navbarBrandProps}>
@@ -125,8 +138,10 @@ const Sidebar = (props) => {
             />
           </NavbarBrand>
         ) : null}
+
         {/* User */}
         <Nav className="align-items-center d-md-none">
+
           <UncontrolledDropdown nav>
             <DropdownToggle nav className="nav-link-icon">
               <i className="ni ni-bell-55" />
@@ -142,6 +157,8 @@ const Sidebar = (props) => {
               <DropdownItem>Something else here</DropdownItem>
             </DropdownMenu>
           </UncontrolledDropdown>
+
+
           <UncontrolledDropdown nav>
             <DropdownToggle nav>
               <Media className="align-items-center">
@@ -153,39 +170,58 @@ const Sidebar = (props) => {
                 </span>
               </Media>
             </DropdownToggle>
+
+
             <DropdownMenu className="dropdown-menu-arrow" right>
+
               <DropdownItem className="noti-title" header tag="div">
                 <h6 className="text-overflow m-0">Welcome!</h6>
               </DropdownItem>
+
+              {/* user profile*/}
               <DropdownItem to="/admin/user-profile" tag={Link}>
                 <i className="ni ni-single-02" />
                 <span>My profile</span>
               </DropdownItem>
+
+              {/* user profile*/}
               <DropdownItem to="/admin/user-profile" tag={Link}>
                 <i className="ni ni-settings-gear-65" />
                 <span>Settings</span>
               </DropdownItem>
-              <DropdownItem to="/admin/user-profile" tag={Link}>
+
+              {/* Registered Users*/}
+              <DropdownItem to="/admin/tables" tag={Link}>
                 <i className="ni ni-calendar-grid-58" />
                 <span>Activity</span>
               </DropdownItem>
-              <DropdownItem to="/admin/user-profile" tag={Link}>
+
+              {/* <DropdownItem to="/admin/user-profile" tag={Link}>
                 <i className="ni ni-support-16" />
                 <span>Support</span>
-              </DropdownItem>
+              </DropdownItem> */}
+
               <DropdownItem divider />
-              <DropdownItem href="#pablo" onClick={(e) => e.preventDefault()}>
+
+              {/* logout */}
+              <DropdownItem href="#pablo" onClick={(e) =>{
+                 LogoutSession();
+                 window.location.reload()
+                }}>
                 <i className="ni ni-user-run" />
                 <span>Logout</span>
               </DropdownItem>
+
             </DropdownMenu>
           </UncontrolledDropdown>
         </Nav>
+
         {/* Collapse */}
         <Collapse navbar isOpen={collapseOpen}>
           {/* Collapse header */}
           <div className="navbar-collapse-header d-md-none">
             <Row>
+
               {logo ? (
                 <Col className="collapse-brand" xs="6">
                   {logo.innerLink ? (
@@ -199,6 +235,7 @@ const Sidebar = (props) => {
                   )}
                 </Col>
               ) : null}
+
               <Col className="collapse-close" xs="6">
                 <button
                   className="navbar-toggler"
@@ -211,6 +248,7 @@ const Sidebar = (props) => {
               </Col>
             </Row>
           </div>
+
           {/* Form */}
           <Form className="mt-4 mb-3 d-md-none">
             <InputGroup className="input-group-rounded input-group-merge">
@@ -227,6 +265,7 @@ const Sidebar = (props) => {
               </InputGroupAddon>
             </InputGroup>
           </Form>
+
           {/* Navigation */}
           <Nav navbar>{createLinks(routes)}</Nav>
           {/* Divider */}

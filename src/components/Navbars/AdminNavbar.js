@@ -22,12 +22,12 @@ import {
   DropdownItem,
   UncontrolledDropdown,
   DropdownToggle,
-  Form,
-  FormGroup,
-  InputGroupAddon,
-  InputGroupText,
-  Input,
-  InputGroup,
+  // Form,
+  // FormGroup,
+  // InputGroupAddon,
+  // InputGroupText,
+  // Input,
+  // InputGroup,
   Navbar,
   Nav,
   Container,
@@ -35,6 +35,7 @@ import {
 } from "reactstrap";
 
 const AdminNavbar = (props) => {
+  
   return (
     <>
       <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
@@ -45,7 +46,8 @@ const AdminNavbar = (props) => {
           >
             {props.brandText}
           </Link>
-          <Form className="navbar-search navbar-search-dark form-inline mr-3 d-none d-md-flex ml-lg-auto">
+
+          {/* <Form className="navbar-search navbar-search-dark form-inline mr-3 d-none d-md-flex ml-lg-auto">
             <FormGroup className="mb-0">
               <InputGroup className="input-group-alternative">
                 <InputGroupAddon addonType="prepend">
@@ -56,8 +58,10 @@ const AdminNavbar = (props) => {
                 <Input placeholder="Search" type="text" />
               </InputGroup>
             </FormGroup>
-          </Form>
+          </Form> */}
+
           <Nav className="align-items-center d-none d-md-flex" navbar>
+
             <UncontrolledDropdown nav>
               <DropdownToggle className="pr-0" nav>
                 <Media className="align-items-center">
@@ -74,15 +78,20 @@ const AdminNavbar = (props) => {
                   </Media>
                 </Media>
               </DropdownToggle>
+
+
               <DropdownMenu className="dropdown-menu-arrow" right>
                 <DropdownItem className="noti-title" header tag="div">
                   <h6 className="text-overflow m-0">Welcome!</h6>
                 </DropdownItem>
+
+                {/* My Profile */}
                 <DropdownItem to="/admin/user-profile" tag={Link}>
                   <i className="ni ni-single-02" />
                   <span>My profile</span>
                 </DropdownItem>
-                <DropdownItem to="/admin/user-profile" tag={Link}>
+
+                {/* <DropdownItem to="/admin/user-profile" tag={Link}>
                   <i className="ni ni-settings-gear-65" />
                   <span>Settings</span>
                 </DropdownItem>
@@ -93,13 +102,18 @@ const AdminNavbar = (props) => {
                 <DropdownItem to="/admin/user-profile" tag={Link}>
                   <i className="ni ni-support-16" />
                   <span>Support</span>
-                </DropdownItem>
+                </DropdownItem> */}
+
                 <DropdownItem divider />
+
+                {/* Logout */}
                 <DropdownItem href="#pablo" onClick={(e) => e.preventDefault()}>
                   <i className="ni ni-user-run" />
                   <span>Logout</span>
                 </DropdownItem>
+
               </DropdownMenu>
+
             </UncontrolledDropdown>
           </Nav>
         </Container>

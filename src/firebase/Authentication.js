@@ -7,7 +7,6 @@ import {
     setPersistence, 
     signInWithEmailAndPassword, 
     browserLocalPersistence,
-    browserSessionPersistence,
     signOut,
     createUserWithEmailAndPassword,
 } from "@firebase/auth";
@@ -110,7 +109,7 @@ export const ForgotPasswords = (email) => {
 export const LoginSession = (user) => {
     return new Promise((resolve, reject) => {
 
-      setPersistence(auth, browserSessionPersistence)
+      setPersistence(auth, browserLocalPersistence)
 
         .then(() => {
           signInWithEmailAndPassword(auth, user.email, user.password)

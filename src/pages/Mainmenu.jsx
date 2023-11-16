@@ -8,10 +8,12 @@ import {
 
 const Mainmenu = () => {
   return (
-    <div>    <Routes>
-    <Route path="/admin/*" element={<AuthLayout />} />
-    <Route path="*" element={<Navigate to="/admin" replace />} />
-  </Routes></div>
+    <div>    
+      <Routes>
+        <Route path="/admin/*" element={<AuthLayout />} />
+        <Route path="*" element={<Navigate to="/admin" replace />} />
+      </Routes>
+    </div>
   )
 }
 
