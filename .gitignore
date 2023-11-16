@@ -3,3 +3,4 @@
 /build
 .eslintcache
 /.env
+/.firebase
