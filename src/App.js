@@ -1,22 +1,33 @@
 import React from 'react'
-import AdminLayout from "layouts/Admin.js";
-import AuthLayout from "layouts/Auth.js";
-import { 
-    Navigate, 
-    Route, 
-    Routes 
-} from 'react-router-dom'
+
+import Authentication from 'pages/Authentication';
+import Mainmenu from 'pages/Mainmenu';
+import { statusLogin } from './firebase/Authentication';
 
 const App = () => {
+  const [isAuthenticated, setAuthenticated] =  React.useState()
+
+  React.useEffect(()=>{
+
+  // Check the status login
+  statusLogin()
+    .then(user=>
+      { 
+        user !== null ? setAuthenticated("authenticated") : setAuthenticated("login") 
+      })
+
+  },[isAuthenticated])
+
   return (
     <div>    
-        <Routes>
-            <Route path="/admin/*" element={<AdminLayout />} />
-            <Route path="/auth/*" element={<AuthLayout />} />
-            <Route path="*" element={<Navigate to="/auth" replace />} />
-        </Routes>
+      {isAuthenticated === "login" && <Authentication />}
+      {isAuthenticated === "authenticated" && <Mainmenu />}
     </div>
   )
 }
+
+
+
+
 
 export default App

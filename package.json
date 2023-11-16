@@ -39,7 +39,8 @@
     "react-router-dom": "6.11.1",
     "react-scripts": "5.0.1",
     "reactstrap": "8.10.0",
-    "sass": "1.62.1"
+    "sass": "1.62.1",
+    "yup": "^0.32.11"
   },
   "peerDependencies": {
     "react": ">=16.0.0",
