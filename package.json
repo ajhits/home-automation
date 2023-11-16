@@ -3,7 +3,6 @@
   "version": "1.2.3",
   "description": "Configure by Jolo Developer",
   "main": "index.js",
-
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -28,6 +27,7 @@
     "bootstrap": "4.6.2",
     "chart.js": "2.9.4",
     "classnames": "2.3.2",
+    "firebase": "^10.6.0",
     "moment": "2.29.4",
     "nouislider": "15.4.0",
     "react": ">=16.0.0",
