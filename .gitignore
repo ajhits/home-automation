@@ -1,6 +1,1 @@
-/build
-/node_modules
-package-lock.json
-/build
-.eslintcache
-/.env
+/Firebase/__pycache__
