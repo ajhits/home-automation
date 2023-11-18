@@ -21,19 +21,38 @@ import {
 
 import Header from "components/Headers/Header.js";
 
+import { control_function } from "../../firebase/Database"; 
+import React from "react";
+
 const Tables = () => {
+
+  const [ req, setReq ] = React.useState(false)
+
+  const initiate_rfid = e => {
+    e.preventDefault()
+    control_function({
+      Name: "RFID",
+      Value: !req
+    })
+
+    setReq(!req)
+  }
   return (
     <>
       <Header />
+
       {/* Page content */}
       <Container className="mt--7" fluid>
+
         {/* Table */}
         <Row>
           <div className="col">
             <Card className="shadow">
+
               <CardHeader className="border-0">
                 <h3 className="mb-0">Card tables</h3>
               </CardHeader>
+
               <Table className="align-items-center table-flush" responsive>
                 <thead className="thead-light">
                   <tr>
@@ -48,6 +67,7 @@ const Tables = () => {
                   {/* Add your table rows here */}
                 </tbody>
               </Table>
+
               <CardFooter className="py-4">
                 <nav aria-label="...">
                   <Pagination
@@ -58,13 +78,15 @@ const Tables = () => {
                   </Pagination>
                 </nav>
               </CardFooter>
+
             </Card>
+
             {/* Button to initiate */}
             <Card className="mt-4 shadow text-center">
             <CardBody>
-             <Button color="info">Initiate RFID</Button>
+             <Button color="info" onClick={initiate_rfid} disabled={req}>Initiate RFID</Button>
                <p className="mt-2">
-                Click this button before trying to input registration to activate the RFID Registration Mode
+                  {req ? "Please tap your RFID" : "Click this button before trying to input registration to activate the RFID Registration Mode"}
                </p>
             </CardBody>
           </Card>
@@ -75,6 +97,7 @@ const Tables = () => {
                 <h3 className="mb-0">Register New User</h3>
               </CardHeader>
               <CardBody>
+
                 {/* Form for registration */}
                 <Form>
                   <FormGroup>
@@ -86,6 +109,7 @@ const Tables = () => {
                       placeholder="Enter name"
                     />
                   </FormGroup>
+
                   <FormGroup>
                     <Label for="familiarity">Familiarity</Label>
                     <Input
@@ -95,6 +119,7 @@ const Tables = () => {
                       placeholder="Enter familiarity"
                     />
                   </FormGroup>
+
                   <FormGroup>
                     <Label for="tagId">Tag ID</Label>
                     <Input
@@ -107,6 +132,7 @@ const Tables = () => {
                   <Button color="primary">Register</Button>
                 </Form>
               </CardBody>
+
             </Card>
           </div>
         </Row>

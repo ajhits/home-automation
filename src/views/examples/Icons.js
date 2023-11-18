@@ -11,11 +11,14 @@ import {
 } from "reactstrap";
 import Header from "components/Headers/Header.js";
 
+import { control_function } from "../../firebase/Database"; 
+
+
 const Icons = () => {
   const [buttonStates, setButtonStates] = useState({
-    button1: false,
-    button2: false,
-    button3: false,
+    LIGHTS: false,
+    DOOR: false,
+    WINDOW: false,
     button4: false,
     button5: false,
     button6: false,
@@ -24,6 +27,12 @@ const Icons = () => {
   });
 
   const toggleButton = (buttonName) => {
+    control_function({
+      Name:buttonName, 
+      Value:!buttonStates[buttonName]
+    })
+    
+
     setButtonStates({
       ...buttonStates,
       [buttonName]: !buttonStates[buttonName],
@@ -45,41 +54,49 @@ const Icons = () => {
                 <h3 className="mb-0">Manual Controls</h3>
               </CardHeader>
               <CardBody>
+
+
                 <Row>
-                  <Col md="3" xs="12">
+                  {/* Lights */}
+                  <Col md="3" sm="2" xs="12">
                     <div className="text-center">
                       <Button
-                        color={buttonStates.button1 ? "success" : "primary"}
-                        onClick={() => toggleButton("button1")}
+                        color={buttonStates.LIGHTS ? "success" : "primary"}
+                        onClick={() => toggleButton("LIGHTS")}
                       >
-                        {buttonStates.button1 ? "On" : "Off"}
+                        {buttonStates.LIGHTS ? "On" : "Off"}
                       </Button>
                       <p>Lights</p>
                     </div>
                   </Col>
-                  <Col md="3" xs="12">
+
+                  {/* Door */}
+                  <Col md="3" sm="2" xs="12">
                     <div className="text-center">
                       <Button
-                        color={buttonStates.button2 ? "success" : "primary"}
-                        onClick={() => toggleButton("button2")}
+                        color={buttonStates.DOOR ? "success" : "primary"}
+                        onClick={() => toggleButton("DOOR")}
                       >
-                        {buttonStates.button2 ? "On" : "Off"}
+                        {buttonStates.DOOR ? "On" : "Off"}
                       </Button>
                       <p>Door</p>
                     </div>
                   </Col>
-                  <Col md="3" xs="12">
+
+                  {/* Window */}
+                  <Col md="3" sm="2" xs="12">
                     <div className="text-center">
                       <Button
-                        color={buttonStates.button3 ? "success" : "primary"}
-                        onClick={() => toggleButton("button3")}
+                        color={buttonStates.WINDOW ? "success" : "primary"}
+                        onClick={() => toggleButton("WINDOW")}
                       >
-                        {buttonStates.button3 ? "On" : "Off"}
+                        {buttonStates.WINDOW ? "On" : "Off"}
                       </Button>
                       <p>Window</p>
                     </div>
                   </Col>
-                  <Col md="3" xs="12">
+
+                  <Col md="3" sm="2" xs="12">
                     <div className="text-center">
                       <Button
                         color={buttonStates.button4 ? "success" : "primary"}
@@ -90,9 +107,12 @@ const Icons = () => {
                       <p>Another Device</p>
                     </div>
                   </Col>
+
                 </Row>
+
+                {/* ********************** uname functions ***********************/}
                 <Row>
-                  <Col md="3" xs="12">
+                  <Col md="3" sm="2" xs="12">
                     <div className="text-center">
                       <Button
                         color={buttonStates.button5 ? "success" : "primary"}
