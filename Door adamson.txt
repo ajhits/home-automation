@@ -1,0 +1,56 @@
+import RPi.GPIO as GPIO
+import time
+
+# Define servo pins
+servo_pin1 = 20  # GPIO pin 20
+servo_pin2 = 18  # GPIO pin 18
+
+# Set up GPIO
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(servo_pin1, GPIO.OUT)
+GPIO.setup(servo_pin2, GPIO.OUT)
+
+# Create PWM instances for servos
+servo1 = GPIO.PWM(servo_pin1, 50)  # 50 Hz frequency
+servo2 = GPIO.PWM(servo_pin2, 50)
+
+# Start PWM with 0% duty cycle (servo at 0 degrees)
+servo1.start(0)
+servo2.start(0)
+
+def move_servos_smoothly(pos1, pos2):
+    # Move servo 1
+    duty_cycle1 = pos1 / 18.0 + 2.5
+    servo1.ChangeDutyCycle(duty_cycle1)
+
+    # Move servo 2
+    duty_cycle2 = pos2 / 18.0 + 2.5
+    servo2.ChangeDutyCycle(duty_cycle2)
+
+    time.sleep(1)  # Adjust the sleep time as needed
+
+# Run movements in a loop every 5 seconds
+try:
+    while True:
+        move_servos_smoothly(90, 0)  # Move to 90 degrees
+        print("S1:90, S2:0")
+        time.sleep(1)
+
+        move_servos_smoothly(0, 90)  # Move to 0 degrees
+        print("S1:0, S2:90")
+        time.sleep(1)
+
+        move_servos_smoothly(90, 0)  # Reset
+        print("Reset")
+        time.sleep(1)
+         # Additional 2 seconds delay before the next iteration
+
+except KeyboardInterrupt:
+    pass
+
+finally:
+    # Clean up GPIO on exit
+    servo1.stop()
+    servo2.stop()
+    GPIO.cleanup()
+
