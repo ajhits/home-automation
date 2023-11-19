@@ -11,7 +11,7 @@ import {
 } from "reactstrap";
 import Header from "components/Headers/Header.js";
 
-import { control_function } from "../../firebase/Database"; 
+import { control_function, get_control_function } from "../../firebase/Database"; 
 
 
 const Icons = () => {
@@ -42,6 +42,23 @@ const Icons = () => {
   // Example temperature and humidity values
   const temperature = 25; // in Celsius
   const humidity = 50; // in percentage
+
+  React.useEffect(()=>{
+
+    Object.entries(buttonStates)
+      // eslint-disable-next-line array-callback-return
+      .map(([key,data])=>{
+        get_control_function({Name: key}).then(e=>
+          setButtonStates({
+            ...buttonStates,
+            [key]: e,
+          })
+          
+          )
+      
+      })
+
+  },[buttonStates])
 
   return (
     <>

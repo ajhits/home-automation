@@ -1,7 +1,7 @@
-import { ref, set } from "firebase/database";
+import { onValue, ref, set } from "firebase/database";
 import { RTdb } from "./Configuration";
 
-// **************** cONTROL FUNCTIONS **************** //
+// **************** CONTROL FUNCTIONS **************** //
 export const control_function = async (props) => {
     try {
         const keyRef = ref(RTdb, `${props.Name}/data/`);
@@ -13,3 +13,18 @@ export const control_function = async (props) => {
         console.error(err);
     }
 }
+
+// **************** GET STATUS OF CONTROL FUNCTIONS  **************** //
+export const get_control_function = (props) => {
+    const keyRef = ref(RTdb, `${props.Name}/data`);
+  
+    return new Promise((resolve, reject) => {
+      onValue(keyRef, (snapshot) => {
+        const data = snapshot.val();
+        resolve(data)
+      }, (error) => {
+        reject(error);
+      });
+    });
+    
+  }
