@@ -4,48 +4,66 @@ import time
 from Components.SERVO import move_servo_smoothly,move_two_servos_smoothly
 from Firebase.Firebase import get_control_functions
 
-# ***************** PIN SETUP ***************** #
-CHRISTMAS_PIN = 12
-WINDOW_PIN = 21 # SLIDING WINDOW
-
-# DOOR
-DOOR_PIN_1 = 20  # GPIO pin 20
-DOOR_PIN_2 = 16  # GPIO pin 18
+# ***************** GPIO PIN SETUP ***************** #
+home_devices = {
+    'OUTDOOR_LIGHTS': 20,
+    'INDOOR_LIGHTS': 16,
+    'WINDOW_1_PIN': 26,
+    'WINDOW_2_PIN': 19,
+    'DOOR_PIN_1': 13,
+    'DOOR_PIN_2': 6,
+    'WATER_PUMP': 21,
+    'PET_FEEDER': 12
+}
 
 # GPIO setup
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
-GPIO.setup(CHRISTMAS_PIN, GPIO.OUT) # CHRISTMAS TREE
-GPIO.setup(WINDOW_PIN, GPIO.OUT)    # SLIDING WINDOW
-GPIO.setup(DOOR_PIN_1, GPIO.OUT)    # DOOR 1
-GPIO.setup(DOOR_PIN_2, GPIO.OUT)    # DOOR 2
 
-# Create PWM instance for the servo
-window_servo = GPIO.PWM(WINDOW_PIN, 50)  # 50 Hz frequency
+# setup the Pins
+for key, value in home_devices.items():
+    GPIO.setup(value, GPIO.OUT) # CHRISTMAS TREE
 
-# Start PWM with 0% duty cycle (servo at 0 degrees)
-window_servo.start(0)
+# Create PWM instances for servos in windows
+window_1_servo = GPIO.PWM(home_devices['WINDOW_1_PIN'], 50)  # 50 Hz frequency
+window_2_servo = GPIO.PWM(home_devices['WINDOW_2_PIN'], 50)  # 50 Hz frequency
 
-# Create PWM instances for servos
-door_pin_1 = GPIO.PWM(DOOR_PIN_1, 50)  # 50 Hz frequency
-door_pin_2 = GPIO.PWM(DOOR_PIN_2, 50)
+window_1_servo.start(0)
+window_2_servo.start(0)
 
-# Start PWM with 0% duty cycle (servo at 0 degrees)
+# Create PWM instances for servos in DOOR
+door_pin_1 = GPIO.PWM(home_devices['DOOR_PIN_1'], 50)  # 50 Hz frequency
+door_pin_2 = GPIO.PWM(home_devices['DOOR_PIN_2'], 50)
+
 door_pin_1.start(0)
 door_pin_2.start(0)
 
-# ***************** SLIDING WINDOW ***************** #
-def set_sliding_window(name):
+# Create PWM instances for servos in pet feeder
+pet_feeder_pin = GPIO.PWM(home_devices['PET_FEEDER'], 50)
+pet_feeder_pin.start(0)
+
+# ***************** SLIDING WINDOWS ***************** #
+def set_window_1(name):
     
     # get data from firebase
     data = get_control_functions(name)
     
     if data:
-        move_servo_smoothly(angle=180, servo=window_servo)
-        print("window status: ",data)
+        move_servo_smoothly(angle=180, servo=window_1_servo)
         return
-    print("window status: ", data)
-    move_servo_smoothly(angle=0, servo=window_servo)
+
+    move_servo_smoothly(angle=0, servo=window_1_servo)
+    
+def set_window_2(name):
+    
+    # get data from firebase
+    data = get_control_functions(name)
+    
+    if data:
+        move_servo_smoothly(angle=180, servo=window_2_servo)
+        return
+    
+    move_servo_smoothly(angle=0, servo=window_2_servo)
 
 # ***************** DOOR ***************** #
 def set_door_functions(name):
@@ -54,51 +72,70 @@ def set_door_functions(name):
     data = get_control_functions(name)
     
     if data:
-        move_two_servos_smoothly(angle_1=90, angle_2=0, servo_1=door_pin_1,servo_2=door_pin_2)
+        move_two_servos_smoothly(angle_1=90, angle_2=0, 
+                                 servo_1=door_pin_1,servo_2=door_pin_2)
         time.sleep(3)
         move_two_servos_smoothly(angle_1=0, angle_2=90, servo_1=door_pin_1,servo_2=door_pin_2)
         
-    print("door status: ", data)
+# ***************** OUTDOOR LIGHTS ***************** #
+def outdoor_lights(name):
     
-# ***************** CHRISTMAS TREE ***************** #
-def christmas_tree(name):
+    # get data from firebase
+    data = get_control_functions(name)
+    GPIO.output(home_devices['OUTDOOR_LIGHTS'], data)
+    
+def indoor_lights(name):
+    
+    # get data from firebase
+    data = get_control_functions(name)
+    GPIO.output(home_devices['INDOOR_LIGHTS'], data)
+    
+# ***************** WATER PUMP ***************** #    
+def water_pumps(name):
+    
+    # get data from firebase
+    data = get_control_functions(name)
+    if data:
+        GPIO.output(home_devices['WATER_PUMP'], GPIO.HIGH)
+        time.sleep(4)
+        GPIO.output(home_devices['WATER_PUMP'], GPIO.LOW)
+        
+# ***************** PET FEEDER ***************** #         
+def pet_feeder(name):
     
     # get data from firebase
     data = get_control_functions(name)
     
-    print("christmas tree: ", data)
-    
-    while data:
-        if not data:
-            break
+    if data:
+        move_servo_smoothly(angle=0, servo=pet_feeder_pin)
+        time.sleep(3)
+        move_servo_smoothly(angle=90, servo=pet_feeder_pin)
         
-        GPIO.output(CHRISTMAS_PIN, GPIO.HIGH)
-        time.sleep(0.5)
-        GPIO.output(CHRISTMAS_PIN, GPIO.LOW)
-        time.sleep(0.5)
-
+    
 # ***************** CONTROL FUNCTIONS ***************** #
 def set_to_control_functions(name):
     
     # get data from firebase
     data = get_control_functions(name)
     
-    print(name + ": ",data)
     
 # ***************** THIS IS THE MAIN FUNCTIONS ***************** # 
 def main():
+    threading.Thread(target=outdoor_lights, args=("OUT_LIGHTS",)).start()
+    threading.Thread(target=outdoor_lights, args=("IN_LIGHTS",)).start()
     
-    threading.Thread(target=set_door_functions,args=("DOOR",)).start()
+    set_window_1("WINDOW_1")
+    set_window_1("WINDOW_2")
     
-    threading.Thread(target=christmas_tree,args=("LIGHTS",)).start()
+    threading.Thread(target=set_door_functions, args=("DOOR",)).start()
+    threading.Thread(target=water_pumps, args=("WATER_PUMP",)).start()
     
-    threading.Thread(target=set_sliding_window,args=("WINDOW",)).start()
-    set_sliding_window("WINDOW")
+    pet_feeder("PET_FEEDER")
     
     return main()
   
 if __name__ == '__main__':
-    
+    print("Smart Home is Running")
     main()
 
     

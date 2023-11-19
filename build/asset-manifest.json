@@ -1,0 +1,31 @@
+{
+  "files": {
+    "main.css": "/static/css/main.1461a0c7.css",
+    "main.js": "/static/js/main.0691ea00.js",
+    "static/media/house.jpg": "/static/media/house.41b5c5b23bcc462ff56d.jpg",
+    "static/media/fa-solid-900.ttf": "/static/media/fa-solid-900.4a2cd718d7031b732e76.ttf",
+    "static/media/fa-brands-400.ttf": "/static/media/fa-brands-400.150de8eaa454d669c405.ttf",
+    "static/media/team-1-800x800.jpg": "/static/media/team-1-800x800.fa5a7ac2c81a43925586.jpg",
+    "static/media/fa-solid-900.woff2": "/static/media/fa-solid-900.bb975c966c37455a1bc3.woff2",
+    "static/media/nucleo-icons.svg": "/static/media/nucleo-icons.95fa360c1c73431a0f9a.svg",
+    "static/media/team-4-800x800.jpg": "/static/media/team-4-800x800.99c612eb60728a5aeeb0.jpg",
+    "static/media/fa-brands-400.woff2": "/static/media/fa-brands-400.e033a13ee751afc1860c.woff2",
+    "static/media/fa-regular-400.ttf": "/static/media/fa-regular-400.d87474231f4192884802.ttf",
+    "static/media/adminpic.png": "/static/media/adminpic.1b1431156ef35400140f.png",
+    "static/media/argon-react.png": "/static/media/argon-react.f23b4c1518f4d54aaf82.png",
+    "static/media/fa-regular-400.woff2": "/static/media/fa-regular-400.3223dc79c1adee56370b.woff2",
+    "static/media/nucleo-icons.eot": "/static/media/nucleo-icons.19abb5402a664606b14c.eot",
+    "static/media/nucleo-icons.ttf": "/static/media/nucleo-icons.d6a66724e7a7bf1bba65.ttf",
+    "static/media/nucleo-icons.woff": "/static/media/nucleo-icons.c82c9b7c40130b7116d3.woff",
+    "static/media/fa-v4compatibility.ttf": "/static/media/fa-v4compatibility.0e3a648be390bd8cb094.ttf",
+    "static/media/nucleo-icons.woff2": "/static/media/nucleo-icons.cba267483aa6a7cb6e33.woff2",
+    "static/media/fa-v4compatibility.woff2": "/static/media/fa-v4compatibility.68577e40f3e70067b5da.woff2",
+    "index.html": "/index.html",
+    "main.1461a0c7.css.map": "/static/css/main.1461a0c7.css.map",
+    "main.0691ea00.js.map": "/static/js/main.0691ea00.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.1461a0c7.css",
+    "static/js/main.0691ea00.js"
+  ]
+}
