@@ -1,0 +1,44 @@
+import RPi.GPIO as GPIO
+import time
+
+IR_PIN = 8
+BUZZER_PIN = 12
+detection_timeout = 10  # 10 seconds
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(IR_PIN, GPIO.IN)
+GPIO.setup(BUZZER_PIN, GPIO.OUT)
+GPIO.output(BUZZER_PIN, GPIO.LOW)
+
+def activate_buzzer():
+    GPIO.output(BUZZER_PIN, GPIO.HIGH)
+    print("Buzzer activated!")
+    time.sleep(2)  # Buzzer on for 2 seconds
+    GPIO.output(BUZZER_PIN, GPIO.LOW)
+
+try:
+    detection_start_time = 0
+
+    while True:
+        object_detected = GPIO.input(IR_PIN)
+
+        if not object_detected:
+            if detection_start_time == 0:
+                print("Object detected. Starting countdown...")
+                detection_start_time = time.time()
+
+        else:
+            detection_start_time = 0  # Reset the timer if object detected
+
+        if detection_start_time != 0:
+            elapsed_time = time.time() - detection_start_time
+            if elapsed_time < detection_timeout:
+                countdown_value = detection_timeout - elapsed_time
+                print(f"Countdown: {countdown_value:.1f} seconds")
+
+            else:
+                activate_buzzer()
+                detection_start_time = 0  # Reset the timer after buzzer activation
+
+except KeyboardInterrupt:
+    GPIO.cleanup()
