@@ -15,8 +15,8 @@ export const control_function = async (props) => {
 }
 
 // **************** GET STATUS OF CONTROL FUNCTIONS  **************** //
-export const get_control_function = (props) => {
-    const keyRef = ref(RTdb, `${props.Name}/data`);
+export const get_control_function = (Name) => {
+    const keyRef = ref(RTdb, `${Name}/data`);
   
     return new Promise((resolve, reject) => {
       onValue(keyRef, (snapshot) => {

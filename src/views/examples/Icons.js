@@ -11,20 +11,51 @@ import {
 } from "reactstrap";
 import Header from "components/Headers/Header.js";
 
-import { control_function } from "../../firebase/Database"; 
+import { control_function,get_control_function } from "../../firebase/Database"; 
+
 
 
 const Icons = () => {
   const [buttonStates, setButtonStates] = useState({
-    LIGHTS: Boolean,
+    OUT_LIGHTS: false,
+    IN_LIGHTS: false,
+    WINDOW_1: false,
+    WINDOW_2: false,
     DOOR: false,
-    WINDOW: false,
-    button4: false,
-    button5: false,
-    button6: false,
-    button7: false,
-    button8: false,
+    WATER_PUMP: false,
+    PET_FEEDER: false,
   });
+
+  // Example temperature and humidity values
+  const temperature = 25; // in Celsius
+  const humidity = 50; // in percentage
+
+  React.useState(()=>{
+    // Define an asynchronous function to fetch and update the state
+    const fetchDataAndUpdateState = async () => {
+      const updatedStates = {};
+      
+      // Use Promise.all to wait for all promises to resolve
+      await Promise.all(
+        Object.entries(buttonStates).map(async ([key]) => {
+          const result = await get_control_function(key);
+          updatedStates[key] = Boolean(result);
+        })
+      );
+
+      // Use the functional update form of setButtonStates
+      setButtonStates((prevStates) => ({
+        ...prevStates,
+        ...updatedStates,
+      }));
+
+    
+    };
+
+    // Call the function
+    fetchDataAndUpdateState();
+    
+  },[buttonStates])
 
   const toggleButton = (buttonName) => {
     control_function({
@@ -38,10 +69,6 @@ const Icons = () => {
       [buttonName]: !buttonStates[buttonName],
     });
   };
-
-  // Example temperature and humidity values
-  const temperature = 25; // in Celsius
-  const humidity = 50; // in percentage
 
   return (
     <>
@@ -61,16 +88,57 @@ const Icons = () => {
                   <Col md="3" sm="2" xs="12">
                     <div className="text-center">
                       <Button
-                        color={buttonStates.LIGHTS ? "success" : "primary"}
-                        onClick={() => toggleButton("LIGHTS")}
+                        color={buttonStates.OUT_LIGHTS ? "success" : "primary"}
+                        onClick={() => toggleButton("OUT_LIGHTS")}
                       >
-                        {buttonStates.LIGHTS ? "On" : "Off"}
+                        {buttonStates.OUT_LIGHTS ? "On" : "Off"}
                       </Button>
-                      <p>Lights</p>
+                      <p>outdoor lights</p>
                     </div>
                   </Col>
 
                   {/* Door */}
+                  <Col md="3" sm="2" xs="12">
+                    <div className="text-center">
+                      <Button
+                        color={buttonStates.IN_LIGHTS ? "success" : "primary"}
+                        onClick={() => toggleButton("IN_LIGHTS")}
+                      >
+                        {buttonStates.IN_LIGHTS ? "On" : "Off"}
+                      </Button>
+                      <p>indoor lights</p>
+                    </div>
+                  </Col>
+
+                  {/* Window */}
+                  <Col md="3" sm="2" xs="12">
+                    <div className="text-center">
+                      <Button
+                        color={buttonStates.WINDOW_1 ? "success" : "primary"}
+                        onClick={() => toggleButton("WINDOW_1")}
+                      >
+                        {buttonStates.WINDOW_1 ? "On" : "Off"}
+                      </Button>
+                      <p>Window 1</p>
+                    </div>
+                  </Col>
+
+                  <Col md="3" sm="2" xs="12">
+                    <div className="text-center">
+                      <Button
+                        color={buttonStates.WINDOW_2 ? "success" : "primary"}
+                        onClick={() => toggleButton("WINDOW_2")}
+                      >
+                        {buttonStates.WINDOW_2 ? "On" : "Off"}
+                      </Button>
+                      <p>Window 2</p>
+                    </div>
+                  </Col>
+
+                </Row>
+
+                {/* ********************** uname functions ***********************/}
+                <Row>
                   <Col md="3" sm="2" xs="12">
                     <div className="text-center">
                       <Button
@@ -82,80 +150,29 @@ const Icons = () => {
                       <p>Door</p>
                     </div>
                   </Col>
-
-                  {/* Window */}
-                  <Col md="3" sm="2" xs="12">
+                  <Col md="3" xs="12">
                     <div className="text-center">
                       <Button
-                        color={buttonStates.WINDOW ? "success" : "primary"}
-                        onClick={() => toggleButton("WINDOW")}
+                        color={buttonStates.WATER_PUMP ? "success" : "primary"}
+                        onClick={() => toggleButton("WATER_PUMP")}
                       >
-                        {buttonStates.WINDOW ? "On" : "Off"}
+                        {buttonStates.WATER_PUMP ? "On" : "Off"}
                       </Button>
-                      <p>Window</p>
-                    </div>
-                  </Col>
-
-                  <Col md="3" sm="2" xs="12">
-                    <div className="text-center">
-                      <Button
-                        color={buttonStates.button4 ? "success" : "primary"}
-                        onClick={() => toggleButton("button4")}
-                      >
-                        {buttonStates.button4 ? "On" : "Off"}
-                      </Button>
-                      <p>Another Device</p>
-                    </div>
-                  </Col>
-
-                </Row>
-
-                {/* ********************** uname functions ***********************/}
-                <Row>
-                  <Col md="3" sm="2" xs="12">
-                    <div className="text-center">
-                      <Button
-                        color={buttonStates.button5 ? "success" : "primary"}
-                        onClick={() => toggleButton("button5")}
-                      >
-                        {buttonStates.button5 ? "On" : "Off"}
-                      </Button>
-                      <p>Device 5</p>
+                      <p>Water Pump</p>
                     </div>
                   </Col>
                   <Col md="3" xs="12">
                     <div className="text-center">
                       <Button
-                        color={buttonStates.button6 ? "success" : "primary"}
-                        onClick={() => toggleButton("button6")}
+                        color={buttonStates.PET_FEEDER ? "success" : "primary"}
+                        onClick={() => toggleButton("PET_FEEDER")}
                       >
-                        {buttonStates.button6 ? "On" : "Off"}
+                        {buttonStates.PET_FEEDER ? "On" : "Off"}
                       </Button>
-                      <p>Device 6</p>
+                      <p>Pet Feeder</p>
                     </div>
                   </Col>
-                  <Col md="3" xs="12">
-                    <div className="text-center">
-                      <Button
-                        color={buttonStates.button7 ? "success" : "primary"}
-                        onClick={() => toggleButton("button7")}
-                      >
-                        {buttonStates.button7 ? "On" : "Off"}
-                      </Button>
-                      <p>Device 7</p>
-                    </div>
-                  </Col>
-                  <Col md="3" xs="12">
-                    <div className="text-center">
-                      <Button
-                        color={buttonStates.button8 ? "success" : "primary"}
-                        onClick={() => toggleButton("button8")}
-                      >
-                        {buttonStates.button8 ? "On" : "Off"}
-                      </Button>
-                      <p>Device 8</p>
-                    </div>
-                  </Col>
+                 
                 </Row>
 
                 {/* Temperature and Humidity */}
