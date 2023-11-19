@@ -5,7 +5,7 @@ from Components.SERVO import move_servo_smoothly,move_two_servos_smoothly
 from Firebase.Firebase import get_control_functions
 
 # ***************** PIN SETUP ***************** #
-CHRISTMAS_PIN = 8
+CHRISTMAS_PIN = 12
 WINDOW_PIN = 21 # SLIDING WINDOW
 
 # DOOR
@@ -93,6 +93,7 @@ def main():
     threading.Thread(target=christmas_tree,args=("LIGHTS",)).start()
     
     threading.Thread(target=set_sliding_window,args=("WINDOW",)).start()
+    set_sliding_window("WINDOW")
     
     return main()
   
