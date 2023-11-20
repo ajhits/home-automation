@@ -101,37 +101,30 @@ def main():
     threading.Thread(target=control_door, args=('DOOR',)).start()
     
     threading.Thread(target=control_servo, args=(
-        "WINDOW_1",
-        window_1_servo,
-        180)).start()
+        "WINDOW_1",     # name
+        window_1_servo, # servo
+        180             # open_angle
+        )).start()
     
     window_2 = threading.Thread(target=control_servo, args=(
-        "WINDOW_1",
-        window_2_servo,
-        180))
+        "WINDOW_2",     # name
+        window_2_servo, # servo
+        180             # open_angle
+        )).start()
     
     pet_feeder = threading.Thread(target=control_servo, args=(
-        "WINDOW_1",
-        pet_feeder_pin,
-        180,
-        0,
-        3))
+        "PET_FEEDER",    # name
+        window_2_servo,  # servo
+        180,             # open_angle
+        0,               # close_angle = default 0
+        3                # close_delay = default None
+        ))
     
     window_2.start()
     pet_feeder.start()
     
     window_2.join()
     pet_feeder.join()
-    
-    
-    
-    # set_window_1("WINDOW_1")
-    # set_window_1("WINDOW_2")
-    
-    # threading.Thread(target=set_door_functions, args=("DOOR",)).start()
-    # threading.Thread(target=water_pumps, args=("WATER_PUMP",)).start()
-    
-    # pet_feeder("PET_FEEDER")
     
     return main()
 
