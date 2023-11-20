@@ -2,9 +2,9 @@ import threading
 import RPi.GPIO as GPIO
 import time
 from Components.SERVO import move_servo_smoothly, move_two_servos_smoothly
-from Components.RFID import read_rfid
 from Firebase.Firebase import get_control_functions
 
+from mfrc522 import SimpleMFRC522
 
 # GPIO setup
 GPIO.setmode(GPIO.BCM)
@@ -12,8 +12,8 @@ GPIO.setwarnings(False)
 
 # GPIO PIN SETUP
 home_devices = {
-    'OUTDOOR_LIGHTS': 20,
-    'INDOOR_LIGHTS': 16,
+    'OUT_LIGHTS': 20,
+    'IN_LIGHTS': 16,
     'WINDOW_1_PIN': 26,
     'WINDOW_2_PIN': 19,
     'DOOR_PIN_1': 13,
@@ -44,6 +44,17 @@ door_pin_2.start(0)
 
 pet_feeder_pin.start(0)
 
+reader = SimpleMFRC522()
+
+# Function to read RFID tags
+def read_rfid():
+    try:
+        print("Hold a tag near the reader")
+        id, _ = reader.read()
+        return id
+    finally:
+        print("finally")
+
 # ***************** LIGHTS ***************** #
 def control_lights(name):
     
@@ -51,7 +62,7 @@ def control_lights(name):
     data = get_control_functions(name)
     GPIO.output(home_devices[name], data)
     
-    print(f"{name} is open")
+
     
 # ***************** DOOR ***************** #
 def door_status(open):
@@ -66,7 +77,7 @@ def control_door(name):
     # get data from firebase
     data = get_control_functions(name)
     door_status(data)
-    print("Door is Open")
+
     
 # ***************** WINDOWS and PET FEEDER ***************** # 
 def control_servo(name, servo, open_angle, close_angle=0, close_delay=None):
@@ -76,7 +87,7 @@ def control_servo(name, servo, open_angle, close_angle=0, close_delay=None):
 
     if data:
         move_servo_smoothly(angle=open_angle, servo=servo)
-        print(f"{name} is open")
+    
         
         if close_delay is not None:
             time.sleep(close_delay)
@@ -88,43 +99,45 @@ def control_servo(name, servo, open_angle, close_angle=0, close_delay=None):
 # ***************** RFID ***************** # 
 def rfid_functions():
     try:
-        uid = read_rfid
+        uid = read_rfid()
         print("your RFID: ", uid)
+        time.sleep(2)
         return rfid_functions()
     except:
         return rfid_functions()
     
 def main():
+
     threading.Thread(target=control_lights, args=('OUT_LIGHTS',)).start()
     threading.Thread(target=control_lights, args=('IN_LIGHTS',)).start()
     
     threading.Thread(target=control_door, args=('DOOR',)).start()
     
-    threading.Thread(target=control_servo, args=(
-        "WINDOW_1",     # name
-        window_1_servo, # servo
-        180             # open_angle
-        )).start()
+    # threading.Thread(target=control_servo, args=(
+    #     "WINDOW_1",     # name
+    #     window_1_servo, # servo
+    #     180             # open_angle
+    #     )).start()
     
-    window_2 = threading.Thread(target=control_servo, args=(
-        "WINDOW_2",     # name
-        window_2_servo, # servo
-        180             # open_angle
-        )).start()
+    # window_2 = threading.Thread(target=control_servo, args=(
+    #     "WINDOW_2",     # name
+    #     window_2_servo, # servo
+    #     180             # open_angle
+    #     )).start()
     
-    pet_feeder = threading.Thread(target=control_servo, args=(
-        "PET_FEEDER",    # name
-        window_2_servo,  # servo
-        180,             # open_angle
-        0,               # close_angle = default 0
-        3                # close_delay = default None
-        ))
+    # pet_feeder = threading.Thread(target=control_servo, args=(
+    #     "PET_FEEDER",    # name
+    #     window_2_servo,  # servo
+    #     180,             # open_angle
+    #     0,               # close_angle = default 0
+    #     3                # close_delay = default None
+    #     ))
     
-    window_2.start()
-    pet_feeder.start()
+    # window_2.start()
+    # pet_feeder.start()
     
-    window_2.join()
-    pet_feeder.join()
+    # window_2.join()
+    # pet_feeder.join()
     
     return main()
 
