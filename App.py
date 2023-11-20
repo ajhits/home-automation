@@ -1,10 +1,16 @@
 import threading
 import RPi.GPIO as GPIO
 import time
-from Components.SERVO import move_servo_smoothly,move_two_servos_smoothly
+from Components.SERVO import move_servo_smoothly, move_two_servos_smoothly
+from Components.RFID import read_rfid
 from Firebase.Firebase import get_control_functions
 
-# ***************** GPIO PIN SETUP ***************** #
+
+# GPIO setup
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+
+# GPIO PIN SETUP
 home_devices = {
     'OUTDOOR_LIGHTS': 20,
     'INDOOR_LIGHTS': 16,
@@ -16,129 +22,123 @@ home_devices = {
     'PET_FEEDER': 12
 }
 
-# GPIO setup
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
+# Setup the Pins
+for device_pin in home_devices.values():
+    GPIO.setup(device_pin, GPIO.OUT)
 
-# setup the Pins
-for key, value in home_devices.items():
-    GPIO.setup(value, GPIO.OUT) # CHRISTMAS TREE
+# Create PWM instances for servos
+window_1_servo = GPIO.PWM(home_devices['WINDOW_1_PIN'], 50)
+window_2_servo = GPIO.PWM(home_devices['WINDOW_2_PIN'], 50)
 
-# Create PWM instances for servos in windows
-window_1_servo = GPIO.PWM(home_devices['WINDOW_1_PIN'], 50)  # 50 Hz frequency
-window_2_servo = GPIO.PWM(home_devices['WINDOW_2_PIN'], 50)  # 50 Hz frequency
+door_pin_1 = GPIO.PWM(home_devices['DOOR_PIN_1'], 50)
+door_pin_2 = GPIO.PWM(home_devices['DOOR_PIN_2'], 50)
 
+pet_feeder_pin = GPIO.PWM(home_devices['PET_FEEDER'], 50)
+
+# Start PWM
 window_1_servo.start(0)
 window_2_servo.start(0)
-
-# Create PWM instances for servos in DOOR
-door_pin_1 = GPIO.PWM(home_devices['DOOR_PIN_1'], 50)  # 50 Hz frequency
-door_pin_2 = GPIO.PWM(home_devices['DOOR_PIN_2'], 50)
 
 door_pin_1.start(0)
 door_pin_2.start(0)
 
-# Create PWM instances for servos in pet feeder
-pet_feeder_pin = GPIO.PWM(home_devices['PET_FEEDER'], 50)
 pet_feeder_pin.start(0)
 
-# ***************** SLIDING WINDOWS ***************** #
-def set_window_1(name):
+# ***************** LIGHTS ***************** #
+def control_lights(name):
     
     # get data from firebase
     data = get_control_functions(name)
+    GPIO.output(home_devices[name], data)
     
-    if data:
-        move_servo_smoothly(angle=180, servo=window_1_servo)
-        return
-
-    move_servo_smoothly(angle=0, servo=window_1_servo)
+    print(f"{name} is open")
     
-def set_window_2(name):
-    
-    # get data from firebase
-    data = get_control_functions(name)
-    
-    if data:
-        move_servo_smoothly(angle=180, servo=window_2_servo)
-        return
-    
-    move_servo_smoothly(angle=0, servo=window_2_servo)
-
 # ***************** DOOR ***************** #
-def set_door_functions(name):
+def door_status(open):
     
-    # get data from firebase
-    data = get_control_functions(name)
-    
-    if data:
-        move_two_servos_smoothly(angle_1=90, angle_2=0, 
-                                 servo_1=door_pin_1,servo_2=door_pin_2)
+    if open:
+        move_two_servos_smoothly(angle_1=90, angle_2=0, servo_1=door_pin_1,servo_2=door_pin_2)
         time.sleep(3)
         move_two_servos_smoothly(angle_1=0, angle_2=90, servo_1=door_pin_1,servo_2=door_pin_2)
         
-# ***************** OUTDOOR LIGHTS ***************** #
-def outdoor_lights(name):
+def control_door(name):
     
     # get data from firebase
     data = get_control_functions(name)
-    GPIO.output(home_devices['OUTDOOR_LIGHTS'], data)
+    door_status(data)
+    print("Door is Open")
     
-def indoor_lights(name):
+# ***************** WINDOWS and PET FEEDER ***************** # 
+def control_servo(name, servo, open_angle, close_angle=0, close_delay=None):
     
-    # get data from firebase
+    # Get data from firebase
     data = get_control_functions(name)
-    GPIO.output(home_devices['INDOOR_LIGHTS'], data)
-    
-# ***************** WATER PUMP ***************** #    
-def water_pumps(name):
-    
-    # get data from firebase
-    data = get_control_functions(name)
+
     if data:
-        GPIO.output(home_devices['WATER_PUMP'], GPIO.HIGH)
-        time.sleep(4)
-        GPIO.output(home_devices['WATER_PUMP'], GPIO.LOW)
+        move_servo_smoothly(angle=open_angle, servo=servo)
+        print(f"{name} is open")
         
-# ***************** PET FEEDER ***************** #         
-def pet_feeder(name):
+        if close_delay is not None:
+            time.sleep(close_delay)
+            move_servo_smoothly(angle=close_angle, servo=servo)
+            print(f"{name} is closed after {close_delay} seconds")
+    else:
+        move_servo_smoothly(angle=close_angle, servo=servo)
     
-    # get data from firebase
-    data = get_control_functions(name)
+# ***************** RFID ***************** # 
+def rfid_functions():
+    try:
+        uid = read_rfid
+        print("your RFID: ", uid)
+        return rfid_functions()
+    except:
+        return rfid_functions()
     
-    if data:
-        move_servo_smoothly(angle=0, servo=pet_feeder_pin)
-        time.sleep(3)
-        move_servo_smoothly(angle=90, servo=pet_feeder_pin)
-        
-    
-# ***************** CONTROL FUNCTIONS ***************** #
-def set_to_control_functions(name):
-    
-    # get data from firebase
-    data = get_control_functions(name)
-    
-    
-# ***************** THIS IS THE MAIN FUNCTIONS ***************** # 
 def main():
-    threading.Thread(target=outdoor_lights, args=("OUT_LIGHTS",)).start()
-    threading.Thread(target=outdoor_lights, args=("IN_LIGHTS",)).start()
+    threading.Thread(target=control_lights, args=('OUT_LIGHTS',)).start()
+    threading.Thread(target=control_lights, args=('IN_LIGHTS',)).start()
     
-    set_window_1("WINDOW_1")
-    set_window_1("WINDOW_2")
+    threading.Thread(target=control_door, args=('DOOR',)).start()
     
-    threading.Thread(target=set_door_functions, args=("DOOR",)).start()
-    threading.Thread(target=water_pumps, args=("WATER_PUMP",)).start()
+    threading.Thread(target=control_servo, args=(
+        "WINDOW_1",
+        window_1_servo,
+        180)).start()
     
-    pet_feeder("PET_FEEDER")
+    window_2 = threading.Thread(target=control_servo, args=(
+        "WINDOW_1",
+        window_2_servo,
+        180))
+    
+    pet_feeder = threading.Thread(target=control_servo, args=(
+        "WINDOW_1",
+        pet_feeder_pin,
+        180,
+        0,
+        3))
+    
+    window_2.start()
+    pet_feeder.start()
+    
+    window_2.join()
+    pet_feeder.join()
+    
+    
+    
+    # set_window_1("WINDOW_1")
+    # set_window_1("WINDOW_2")
+    
+    # threading.Thread(target=set_door_functions, args=("DOOR",)).start()
+    # threading.Thread(target=water_pumps, args=("WATER_PUMP",)).start()
+    
+    # pet_feeder("PET_FEEDER")
     
     return main()
-  
+
+
 if __name__ == '__main__':
     print("Smart Home is Running")
-    main()
-
     
-        
-
-
+    threading.Thread(target=rfid_functions, args=()).start()
+    
+    main()

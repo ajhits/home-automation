@@ -1,3 +1,4 @@
+# GPIO PIN SETUP
 home_devices = {
     'OUTDOOR_LIGHTS': 20,
     'INDOOR_LIGHTS': 16,
@@ -9,6 +10,12 @@ home_devices = {
     'PET_FEEDER': 12
 }
 
-# Iterating through keys and values
-for key, value in home_devices.items():
-    print(key, ":", value)
+
+def Lights(name):
+    
+    print(home_devices[name])
+    
+    print(f"{name} is open")
+    
+    
+Lights("OUTDOOR_LIGHTS")
