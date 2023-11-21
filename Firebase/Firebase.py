@@ -21,3 +21,15 @@ def get_control_functions(name):
     except Exception as e:
         print("No Internet")
         return False
+
+# update the current data
+def firebaseUpdate(keyName,child, value):
+    try:
+        db.child(keyName).child(child).set(value)
+    except:
+        #print("Walang Internet")
+        return False 
+    finally:
+        print(db.child(keyName).get().val())
+        # print("pumasok sa database")
+        return True

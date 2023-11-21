@@ -2,7 +2,8 @@ import threading
 import RPi.GPIO as GPIO
 import time
 from Components.SERVO import move_servo_smoothly, move_two_servos_smoothly
-from Firebase.Firebase import get_control_functions
+from Firebase.Firebase import get_control_functions, firebaseUpdate
+import socket
 
 from mfrc522 import SimpleMFRC522
 
@@ -62,6 +63,7 @@ def control_lights(name):
     data = get_control_functions(name)
     GPIO.output(home_devices[name], data)
     
+    
 
     
 # ***************** DOOR ***************** #
@@ -77,6 +79,7 @@ def control_door(name):
     # get data from firebase
     data = get_control_functions(name)
     door_status(data)
+
 
     
 # ***************** WINDOWS and PET FEEDER ***************** # 
@@ -99,47 +102,72 @@ def control_servo(name, servo, open_angle, close_angle=0, close_delay=None):
 # ***************** RFID ***************** # 
 def rfid_functions():
     try:
+        
+        # Attempt to create a socket connection to a known server (e.g., Google DNS)
+        socket.create_connection(("8.8.8.8", 53))
+        
         uid = read_rfid()
+        register = get_control_functions("RFID")
         print("your RFID: ", uid)
+        
+        register_rdfid(register_status=register,uid=uid)
+        
+        
         time.sleep(2)
         return rfid_functions()
     except:
+        print("Net Failure")
         return rfid_functions()
     
+def register_rdfid(register_status, uid):
+    if register_status:
+        firebaseUpdate(keyName="RFID", child="rf_uid", value=uid)
+        firebaseUpdate(keyName="RFID", child="data", value=False)
+        
+        return
+        
+    
 def main():
+    
+    try:
 
-    threading.Thread(target=control_lights, args=('OUT_LIGHTS',)).start()
-    threading.Thread(target=control_lights, args=('IN_LIGHTS',)).start()
+        # Attempt to create a socket connection to a known server (e.g., Google DNS)
+        socket.create_connection(("8.8.8.8", 53))
+        
+        threading.Thread(target=control_lights, args=('OUT_LIGHTS',)).start()
+        threading.Thread(target=control_lights, args=('IN_LIGHTS',)).start()
     
-    threading.Thread(target=control_door, args=('DOOR',)).start()
+        threading.Thread(target=control_door, args=('DOOR',)).start()
     
-    # threading.Thread(target=control_servo, args=(
-    #     "WINDOW_1",     # name
-    #     window_1_servo, # servo
-    #     180             # open_angle
-    #     )).start()
+        # threading.Thread(target=control_servo, args=(
+        #     "WINDOW_1",     # name
+        #     window_1_servo, # servo
+        #     180             # open_angle
+        #     )).start()
     
-    # window_2 = threading.Thread(target=control_servo, args=(
-    #     "WINDOW_2",     # name
-    #     window_2_servo, # servo
-    #     180             # open_angle
-    #     )).start()
+        # window_2 = threading.Thread(target=control_servo, args=(
+        #     "WINDOW_2",     # name
+        #     window_2_servo, # servo
+        #     180             # open_angle
+        #     )).start()
     
-    # pet_feeder = threading.Thread(target=control_servo, args=(
-    #     "PET_FEEDER",    # name
-    #     window_2_servo,  # servo
-    #     180,             # open_angle
-    #     0,               # close_angle = default 0
-    #     3                # close_delay = default None
-    #     ))
+        # pet_feeder = threading.Thread(target=control_servo, args=(
+        #     "PET_FEEDER",    # name
+        #     window_2_servo,  # servo
+        #     180,             # open_angle
+        #     0,               # close_angle = default 0
+        #     3                # close_delay = default None
+        #     ))
     
-    # window_2.start()
-    # pet_feeder.start()
+        # window_2.start()
+        # pet_feeder.start()
     
-    # window_2.join()
-    # pet_feeder.join()
-    
-    return main()
+        # window_2.join()
+        # pet_feeder.join()
+
+    except OSError:
+        print("No Internet")
+            
 
 
 if __name__ == '__main__':
@@ -147,4 +175,5 @@ if __name__ == '__main__':
     
     threading.Thread(target=rfid_functions, args=()).start()
     
-    main()
+
+    # main()

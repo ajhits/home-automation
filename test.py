@@ -1,3 +1,6 @@
+from Firebase.Firebase import firebaseUpdate
+
+
 # GPIO PIN SETUP
 home_devices = {
     'OUTDOOR_LIGHTS': 20,
@@ -18,4 +21,5 @@ def Lights(name):
     print(f"{name} is open")
     
     
-Lights("OUTDOOR_LIGHTS")
+
+firebaseUpdate(keyName="RFID", child="data", value=False)
