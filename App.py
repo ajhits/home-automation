@@ -2,7 +2,7 @@ import threading
 import RPi.GPIO as GPIO
 import time
 from Components.SERVO import move_servo_smoothly, move_two_servos_smoothly
-from Firebase.Firebase import get_control_functions, firebaseUpdate
+from Firebase.Firebase import get_control_functions, firebaseUpdate,verifiy_rfid
 import socket
 
 from mfrc522 import SimpleMFRC522
@@ -110,8 +110,9 @@ def rfid_functions():
         register = get_control_functions("RFID")
         print("your RFID: ", uid)
         
-        register_rdfid(register_status=register,uid=uid)
+        register_rdfid(register_status=register, uid=uid)
         
+        verifiy_rfid(rf_uid=uid)
         
         time.sleep(2)
         return rfid_functions()
@@ -121,9 +122,7 @@ def rfid_functions():
     
 def register_rdfid(register_status, uid):
     if register_status:
-        firebaseUpdate(keyName="RFID", child="rf_uid", value=uid)
-        firebaseUpdate(keyName="RFID", child="data", value=False)
-        
+        firebaseUpdate(keyName="RFID", child="rf_uid", value=uid)        
         return
         
     
@@ -139,17 +138,17 @@ def main():
     
         threading.Thread(target=control_door, args=('DOOR',)).start()
     
-        # threading.Thread(target=control_servo, args=(
-        #     "WINDOW_1",     # name
-        #     window_1_servo, # servo
-        #     180             # open_angle
-        #     )).start()
+        threading.Thread(target=control_servo, args=(
+            "WINDOW_1",     # name
+            window_1_servo, # servo
+            180             # open_angle
+            )).start()
     
         # window_2 = threading.Thread(target=control_servo, args=(
         #     "WINDOW_2",     # name
         #     window_2_servo, # servo
         #     180             # open_angle
-        #     )).start()
+        #     ))
     
         # pet_feeder = threading.Thread(target=control_servo, args=(
         #     "PET_FEEDER",    # name

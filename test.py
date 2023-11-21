@@ -1,4 +1,4 @@
-from Firebase.Firebase import firebaseUpdate
+from Firebase.Firebase import firebaseUpdate,verifiy_rfid
 
 
 # GPIO PIN SETUP
@@ -22,4 +22,11 @@ def Lights(name):
     
     
 
-firebaseUpdate(keyName="RFID", child="data", value=False)
+data = verifiy_rfid("rfid")
+for key,value in data.items():
+    
+    
+    print(value['TagID'])
+    
+
+

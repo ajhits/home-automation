@@ -33,3 +33,22 @@ def firebaseUpdate(keyName,child, value):
         print(db.child(keyName).get().val())
         # print("pumasok sa database")
         return True
+      
+# verify RID
+def verifiy_rfid(rf_uid):
+  try:
+    data = db.child("REGISTERED").get().val()
+    
+    for key,value in data.items():
+      if value['TagID'] == rf_uid:
+          return True
+    
+    return False
+      
+        
+    
+
+        
+  except Exception as e:
+    print(f"Error: {e}")
+    return False
