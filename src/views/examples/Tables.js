@@ -23,19 +23,71 @@ import Header from "components/Headers/Header.js";
 
 import { control_function } from "../../firebase/Database"; 
 import React from "react";
+import { get_register_details, set_new_register, update_RFID } from "../../firebase/Database";
 
 const Tables = () => {
 
-  const [ req, setReq ] = React.useState(false)
+  const [req, setReq] = React.useState(false)
+  const [tagID,setTagID] = React.useState({
+    tagId:""
+  })
+  const [register,setRegister] = React.useState({
+    name: "",
+    familiarity: "",
+    tagId: ""
+  })
 
   const initiate_rfid = e => {
     e.preventDefault()
+
     control_function({
       Name: "RFID",
-      Value: !req
+      Value: !req,
     })
 
     setReq(!req)
+  }
+
+  React.useEffect(() => {
+    const fetchRegisterDetails = async () => {
+      try {
+        const tagId = await get_register_details("RFID");
+        setTagID((prevRegister) => ({
+          ...prevRegister,
+          tagId: tagId.rf_uid,
+        }));
+        
+        setReq(tagId.data)
+      } catch (error) {
+        console.error("Error fetching register details:", error);
+      }
+    };
+  
+    // Run the effect when the component mounts
+    fetchRegisterDetails();
+  
+    // Run the effect whenever the register state changes
+  }, [tagID]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setRegister((prevUser) => ({
+      ...prevUser,
+      [name]: value,
+    }));
+  };
+
+  const newRegistered = e => {
+    e.preventDefault()
+
+    set_new_register({
+      TagID: tagID.tagId,
+      Name: register.name,
+      Familiarity: register.familiarity
+    }).then(e=>{
+      update_RFID()
+      alert("Registered User")
+    })
   }
   return (
     <>
@@ -107,6 +159,8 @@ const Tables = () => {
                       name="name"
                       id="name"
                       placeholder="Enter name"
+                      value={register.name}
+                      onChange={handleInputChange}
                     />
                   </FormGroup>
 
@@ -117,6 +171,8 @@ const Tables = () => {
                       name="familiarity"
                       id="familiarity"
                       placeholder="Enter familiarity"
+                      value={register.familiarity}
+                      onChange={handleInputChange}
                     />
                   </FormGroup>
 
@@ -127,9 +183,12 @@ const Tables = () => {
                       name="tagId"
                       id="tagId"
                       placeholder="Tag ID"
+                      disabled={true}
+                      value={tagID.tagId}
+                      // onChange={handleInputChange}
                     />
                   </FormGroup>
-                  <Button color="primary">Register</Button>
+                  <Button color="primary" onClick={newRegistered}>Register</Button>
                 </Form>
               </CardBody>
 
