@@ -25,21 +25,21 @@ def read_rfid():
         GPIO.cleanup()
 
 # Main loop to continuously read RFID tags
-# while True:
-#     try:
-#         uid = read_rfid()
-#         if uid:
-#             print("RFID card detected!")
-#             # Replace the following UID with your allowed UID
-#             allowed_uid = 487492232216   # Replace this with your allowed UID
-#             if uid == allowed_uid:
-#                 print("Access granted!")
-#             else:
-#                 print("Access denied!")
-#         sleep(2)  # Sleep for a while before the next read
-#     except KeyboardInterrupt:
-#         print("\nCtrl+C captured, exiting.")
-#         GPIO.cleanup()
+while True:
+    try:
+        uid = read_rfid()
+        if uid:
+            print("RFID card detected!")
+            # Replace the following UID with your allowed UID
+            allowed_uid = 487492232216   # Replace this with your allowed UID
+            if uid == allowed_uid:
+                print("Access granted!")
+            else:
+                print("Access denied!")
+        sleep(2)  # Sleep for a while before the next read
+    except KeyboardInterrupt:
+        print("\nCtrl+C captured, exiting.")
+        GPIO.cleanup()
 
 
 

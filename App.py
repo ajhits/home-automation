@@ -23,31 +23,66 @@ home_devices = {
     'PET_FEEDER': 12
 }
 
+reader = SimpleMFRC522()
+
 # Setup the Pins
 for device_pin in home_devices.values():
     GPIO.setup(device_pin, GPIO.OUT)
 
-# Create PWM instances for servos
-window_1_servo = GPIO.PWM(home_devices['WINDOW_1_PIN'], 50)
-window_2_servo = GPIO.PWM(home_devices['WINDOW_2_PIN'], 50)
+# ***************** DOOR FUNCTION ***************** # 
+def control_door(data):
+    try:
+        
+        # Initialize servo for door pin
+        door_pin_1 = GPIO.PWM(home_devices['DOOR_PIN_1'], 50)
+        door_pin_2 = GPIO.PWM(home_devices['DOOR_PIN_2'], 50)
+       
+        door_pin_1.start(0)
+        door_pin_2.start(0)
+        
+        # Open The Door
+        if data:
+                                        
+            # Move servo 1
+            duty_cycle1 = 90 / 18.0 + 2.5
+            door_pin_1.ChangeDutyCycle(duty_cycle1)
 
-door_pin_1 = GPIO.PWM(home_devices['DOOR_PIN_1'], 50)
-door_pin_2 = GPIO.PWM(home_devices['DOOR_PIN_2'], 50)
+            # Move servo 2
+            duty_cycle2 = 90 / 18.0 + 2.5
+            door_pin_2.ChangeDutyCycle(duty_cycle2)
 
-pet_feeder_pin = GPIO.PWM(home_devices['PET_FEEDER'], 50)
+            time.sleep(3)
+            
+            # Move servo 1
+            duty_cycle1 = 0 / 18.0 + 2.5
+            door_pin_1.ChangeDutyCycle(duty_cycle1)
 
-# Start PWM
-window_1_servo.start(0)
-window_2_servo.start(0)
+            # Move servo 2
+            duty_cycle2 = 0 / 18.0 + 2.5
+            door_pin_2.ChangeDutyCycle(duty_cycle2)
+            
+            time.sleep(3)
+            
+        firebaseUpdate("DOOR","data",False)
+            
+        door_pin_1.stop(0)
+        door_pin_1.stop(0)
+            
+    except Exception as e:
+        print(f"Error in control_door: {e}")
 
-door_pin_1.start(0)
-door_pin_2.start(0)
-
-pet_feeder_pin.start(0)
-
-reader = SimpleMFRC522()
-
-# Function to read RFID tags
+def control_door_status():
+    data = get_control_functions('DOOR')
+    control_door(data)
+    
+# ***************** RFID ***************** # 
+def register_rdfid(register_status, uid):
+    if register_status:
+        
+        # upload the read RFID
+        firebaseUpdate(keyName="RFID", child="rf_uid", value=uid)        
+        return
+    
 def read_rfid():
     try:
         print("Hold a tag near the reader")
@@ -56,123 +91,60 @@ def read_rfid():
     finally:
         print("finally")
 
-# ***************** LIGHTS ***************** #
-def control_lights(name):
-    
-    # get data from firebase
-    data = get_control_functions(name)
-    GPIO.output(home_devices[name], data)
-    
-    
-
-    
-# ***************** DOOR ***************** #
-def door_status(open):
-    
-    if open:
-        move_two_servos_smoothly(angle_1=90, angle_2=0, servo_1=door_pin_1,servo_2=door_pin_2)
-        time.sleep(3)
-        move_two_servos_smoothly(angle_1=0, angle_2=90, servo_1=door_pin_1,servo_2=door_pin_2)
-        
-def control_door(name):
-    
-    # get data from firebase
-    data = get_control_functions(name)
-    door_status(data)
-
-
-    
-# ***************** WINDOWS and PET FEEDER ***************** # 
-def control_servo(name, servo, open_angle, close_angle=0, close_delay=None):
-    
-    # Get data from firebase
-    data = get_control_functions(name)
-
-    if data:
-        move_servo_smoothly(angle=open_angle, servo=servo)
-    
-        
-        if close_delay is not None:
-            time.sleep(close_delay)
-            move_servo_smoothly(angle=close_angle, servo=servo)
-            print(f"{name} is closed after {close_delay} seconds")
-    else:
-        move_servo_smoothly(angle=close_angle, servo=servo)
-    
-# ***************** RFID ***************** # 
+# Function to initiate RFID
 def rfid_functions():
+    
     try:
         
         # Attempt to create a socket connection to a known server (e.g., Google DNS)
-        socket.create_connection(("8.8.8.8", 53))
-        
+        socket.create_connection(("8.8.8.8",53))
+
+
         uid = read_rfid()
-        register = get_control_functions("RFID")
         print("your RFID: ", uid)
         
+        # if register is occur
+        register = get_control_functions("RFID")
         register_rdfid(register_status=register, uid=uid)
         
-        verifiy_rfid(rf_uid=uid)
-        
+        result = verifiy_rfid(rf_uid=uid)
+        firebaseUpdate("DOOR","data",result)
+            
+        print("Access Granted" if result else "Access Denied")
         time.sleep(2)
+        
         return rfid_functions()
-    except:
+    except Exception as e:
+        pass
         print("Net Failure")
         return rfid_functions()
     
-def register_rdfid(register_status, uid):
-    if register_status:
-        firebaseUpdate(keyName="RFID", child="rf_uid", value=uid)        
-        return
-        
-    
+
+# ***************** Main Function ***************** #  
 def main():
-    
     try:
-
-        # Attempt to create a socket connection to a known server (e.g., Google DNS)
-        socket.create_connection(("8.8.8.8", 53))
         
-        threading.Thread(target=control_lights, args=('OUT_LIGHTS',)).start()
-        threading.Thread(target=control_lights, args=('IN_LIGHTS',)).start()
-    
-        threading.Thread(target=control_door, args=('DOOR',)).start()
-    
-        threading.Thread(target=control_servo, args=(
-            "WINDOW_1",     # name
-            window_1_servo, # servo
-            180             # open_angle
-            )).start()
-    
-        # window_2 = threading.Thread(target=control_servo, args=(
-        #     "WINDOW_2",     # name
-        #     window_2_servo, # servo
-        #     180             # open_angle
-        #     ))
-    
-        # pet_feeder = threading.Thread(target=control_servo, args=(
-        #     "PET_FEEDER",    # name
-        #     window_2_servo,  # servo
-        #     180,             # open_angle
-        #     0,               # close_angle = default 0
-        #     3                # close_delay = default None
-        #     ))
-    
-        # window_2.start()
-        # pet_feeder.start()
-    
-        # window_2.join()
-        # pet_feeder.join()
-
+        # Attempt to create a socket connection to a known server (e.g., Google DNS)
+        socket.create_connection(("8.8.4.4", 53))
+        
+        # For control functions
+        DOOR = threading.Thread(target=control_door_status, args=())
+        DOOR.start()
+        DOOR.join()
+        
+        
+        time.sleep(0.5)
+        return main()
     except OSError:
         print("No Internet")
+        time.sleep(0.5)
+        return main()
             
-
 
 if __name__ == '__main__':
     print("Smart Home is Running")
     
     threading.Thread(target=rfid_functions, args=()).start()
-    
+    main()
 
-    # main()
+    

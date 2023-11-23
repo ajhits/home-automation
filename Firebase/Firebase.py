@@ -30,7 +30,7 @@ def firebaseUpdate(keyName,child, value):
         #print("Walang Internet")
         return False 
     finally:
-        print(db.child(keyName).get().val())
+
         # print("pumasok sa database")
         return True
       
