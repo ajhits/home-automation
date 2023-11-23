@@ -15,7 +15,7 @@ home_devices = {
     'OUT_LIGHTS': 20,
     'IN_LIGHTS': 16,
     'WINDOW_1': 26,
-    'WINDOW_2_': 19,
+    'WINDOW_2': 19,
     'DOOR_PIN_1': 13,
     'DOOR_PIN_2': 6,
     'WATER_PUMP': 21,
@@ -29,7 +29,7 @@ for device_pin in home_devices.values():
     GPIO.setup(device_pin, GPIO.OUT)
     
 # ***************** WINDOW FUNCTION ***************** # 
-def move_servo_smoothly(data):
+def move_servo_smoothly(data,name):
     try:
         
         # Initialize servo for door pin
@@ -40,8 +40,10 @@ def move_servo_smoothly(data):
         if data:
                                         
             # Move servo 1
-            duty_cycle1 = 90 / 18.0 + 2.5
+            duty_cycle1 = 180 / 18.0 + 2.5
             window_pin.ChangeDutyCycle(duty_cycle1)
+            time.sleep(1)
+            window_pin.stop(0)
 
             
         else:
@@ -49,17 +51,19 @@ def move_servo_smoothly(data):
             # Move servo 1
             duty_cycle1 = 0 / 18.0 + 2.5
             window_pin.ChangeDutyCycle(duty_cycle1)
+            time.sleep(1)
+            window_pin.stop(0)
    
             
-        window_pin.stop(0)
+        
             
     except Exception as e:
         print(f"Error in control_door: {e}")
     
 def control_window_status(name):
-    while True:
-        data = get_control_functions(name)
-        move_servo_smoothly(data)
+
+    data = get_control_functions(name)
+    move_servo_smoothly(data,name)
     
 # ***************** DOOR FUNCTION ***************** # 
 def control_door(data):
@@ -85,8 +89,10 @@ def control_door(data):
 
             time.sleep(1)
             firebaseUpdate("DOOR","data",False)
+            
             door_pin_1.stop(0)
             door_pin_1.stop(0)
+            
         else:
             
             # Move servo 1
@@ -117,14 +123,20 @@ def control_lights(name):
     
 # ***************** WATER PUMP ***************** #
 def control_water_pump():
-    data = get_control_functions('WATER_PUMP')  
-    if data:
-        GPIO.output(home_devices['WATER_PUMP'], data)
-        time.sleep(3)
-        GPIO.output(home_devices['WATER_PUMP'], False)
-        firebaseUpdate('WATER_PUMP',"data",False)
-        
-    return control_water_pump()
+    try:
+        data = get_control_functions('WATER_PUMP')  
+        if data:
+            GPIO.output(home_devices['WATER_PUMP'], data)
+            time.sleep(3)
+            GPIO.output(home_devices['WATER_PUMP'], False)
+            firebaseUpdate('WATER_PUMP',"data",False)
+            
+        time.sleep(1)
+        return control_water_pump()
+    except:
+        pass
+        time.sleep(1)
+        return control_water_pump()
 
 # ***************** RFID ***************** # 
 def register_rdfid(register_status, uid):
@@ -173,15 +185,12 @@ def rfid_functions():
 def main():
     try:
         
-        # Attempt to create a socket connection to a known server (e.g., Google DNS)
-        socket.create_connection(("8.8.4.4", 53))
-        
         # For control DOOR functions
         control_door_status()
-        # DOOR = threading.Thread(target=control_door_status, args=())
-        # DOOR.start()
-        # DOOR.join()
         
+        control_window_status('WINDOW_1')
+   
+        # For Controling Lights  
         threading.Thread(target=control_lights, args=('OUT_LIGHTS',)).start()
         threading.Thread(target=control_lights, args=('IN_LIGHTS',)).start()
 
@@ -189,7 +198,7 @@ def main():
         
         time.sleep(0.5)
         return main()
-    except:
+    except Exception as e:
         print("No Internet")
         time.sleep(0.5)
         pass
