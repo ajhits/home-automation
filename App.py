@@ -1,7 +1,6 @@
 import threading
 import RPi.GPIO as GPIO
 import time
-from Components.SERVO import move_servo_smoothly, move_two_servos_smoothly
 from Firebase.Firebase import get_control_functions, firebaseUpdate,verifiy_rfid
 import socket
 
@@ -15,8 +14,8 @@ GPIO.setwarnings(False)
 home_devices = {
     'OUT_LIGHTS': 20,
     'IN_LIGHTS': 16,
-    'WINDOW_1_PIN': 26,
-    'WINDOW_2_PIN': 19,
+    'WINDOW_1': 26,
+    'WINDOW_2_': 19,
     'DOOR_PIN_1': 13,
     'DOOR_PIN_2': 6,
     'WATER_PUMP': 21,
@@ -28,7 +27,40 @@ reader = SimpleMFRC522()
 # Setup the Pins
 for device_pin in home_devices.values():
     GPIO.setup(device_pin, GPIO.OUT)
+    
+# ***************** WINDOW FUNCTION ***************** # 
+def move_servo_smoothly(data):
+    try:
+        
+        # Initialize servo for door pin
+        window_pin = GPIO.PWM(home_devices['DOOR_PIN_1'], 50)
+        window_pin.start(0)
 
+        # Open The Door
+        if data:
+                                        
+            # Move servo 1
+            duty_cycle1 = 90 / 18.0 + 2.5
+            window_pin.ChangeDutyCycle(duty_cycle1)
+
+            
+        else:
+            
+            # Move servo 1
+            duty_cycle1 = 0 / 18.0 + 2.5
+            window_pin.ChangeDutyCycle(duty_cycle1)
+   
+            
+        window_pin.stop(0)
+            
+    except Exception as e:
+        print(f"Error in control_door: {e}")
+    
+def control_window_status(name):
+    while True:
+        data = get_control_functions(name)
+        move_servo_smoothly(data)
+    
 # ***************** DOOR FUNCTION ***************** # 
 def control_door(data):
     try:
@@ -60,10 +92,8 @@ def control_door(data):
             # Move servo 2
             duty_cycle2 = 0 / 18.0 + 2.5
             door_pin_2.ChangeDutyCycle(duty_cycle2)
-            
+            firebaseUpdate("DOOR","data",False)
             time.sleep(3)
-            
-        firebaseUpdate("DOOR","data",False)
             
         door_pin_1.stop(0)
         door_pin_1.stop(0)
@@ -74,7 +104,24 @@ def control_door(data):
 def control_door_status():
     data = get_control_functions('DOOR')
     control_door(data)
+
+# ***************** LIGHTS ***************** #
+def control_lights(name):
+    # get data from firebase
+    data = get_control_functions(name)
+    GPIO.output(home_devices[name], data)
     
+# ***************** WATER PUMP ***************** #
+def control_water_pump():
+    data = get_control_functions('WATER_PUMP')  
+    if data:
+        GPIO.output(home_devices['WATER_PUMP'], data)
+        time.sleep(3)
+        GPIO.output(home_devices['WATER_PUMP'], False)
+        firebaseUpdate('WATER_PUMP',"data",False)
+        
+    return control_water_pump()
+
 # ***************** RFID ***************** # 
 def register_rdfid(register_status, uid):
     if register_status:
@@ -99,7 +146,6 @@ def rfid_functions():
         # Attempt to create a socket connection to a known server (e.g., Google DNS)
         socket.create_connection(("8.8.8.8",53))
 
-
         uid = read_rfid()
         print("your RFID: ", uid)
         
@@ -119,7 +165,6 @@ def rfid_functions():
         print("Net Failure")
         return rfid_functions()
     
-
 # ***************** Main Function ***************** #  
 def main():
     try:
@@ -127,10 +172,14 @@ def main():
         # Attempt to create a socket connection to a known server (e.g., Google DNS)
         socket.create_connection(("8.8.4.4", 53))
         
-        # For control functions
+        # For control DOOR functions
         DOOR = threading.Thread(target=control_door_status, args=())
         DOOR.start()
         DOOR.join()
+        
+        threading.Thread(target=control_lights, args=('OUT_LIGHTS',)).start()
+        threading.Thread(target=control_lights, args=('IN_LIGHTS',)).start()
+
         
         
         time.sleep(0.5)
@@ -145,6 +194,7 @@ if __name__ == '__main__':
     print("Smart Home is Running")
     
     threading.Thread(target=rfid_functions, args=()).start()
+    threading.Thread(target=control_water_pump, args=()).start()
     main()
 
     
