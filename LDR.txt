@@ -1,0 +1,40 @@
+import RPi.GPIO as GPIO
+import time
+
+# Set up GPIO mode
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+
+# Define the GPIO pins for LDR and Relay
+LDR_PIN = 20  # Replace with the actual GPIO pin number for your LDR
+OUT_LIGHT = 18  # Replace with the actual GPIO pin number for your relay
+
+# Set up LDR pin as input and Relay pin as output
+GPIO.setup(LDR_PIN, GPIO.IN)
+GPIO.setup(OUT_LIGHT, GPIO.OUT)
+
+def get_light_intensity():
+    # Read LDR sensor value (0 for dark, 1 for light)
+    return GPIO.input(LDR_PIN)
+
+def control_relay(light_intensity):
+    # Control relay based on light intensity
+    if light_intensity == 1:  # It's light
+        GPIO.output(OUT_LIGHT, GPIO.HIGH)  # Turn on relay
+    else:  # It's dark
+        GPIO.output(OUT_LIGHT, GPIO.LOW)  # Turn off relay
+
+try:
+    while True:
+        light_intensity = get_light_intensity()
+        control_relay(light_intensity)
+        time.sleep(1)  # Adjust the sleep duration as needed
+
+except KeyboardInterrupt:
+    pass
+
+finally:
+    # Clean up GPIO on program exit
+    GPIO.cleanup()
+
+  
