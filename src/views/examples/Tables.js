@@ -140,6 +140,8 @@ const Tables = () => {
                <p className="mt-2">
                   {req ? "Please tap your RFID" : "Click this button before trying to input registration to activate the RFID Registration Mode"}
                </p>
+
+               {req && <Button color="warning" onClick={initiate_rfid}>Cancel Registration</Button>}
             </CardBody>
           </Card>
 

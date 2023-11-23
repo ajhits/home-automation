@@ -30,34 +30,48 @@ const Icons = () => {
   const temperature = 25; // in Celsius
   const humidity = 50; // in percentage
 
-  React.useState(()=>{
-    // Define an asynchronous function to fetch and update the state
-    const fetchDataAndUpdateState = async () => {
-      const updatedStates = {};
-      
-      // Use Promise.all to wait for all promises to resolve
-      await Promise.all(
-        Object.entries(buttonStates).map(async ([key]) => {
-          const result = await get_control_function(key);
-          updatedStates[key] = Boolean(result);
-        })
-      );
 
-      // Use the functional update form of setButtonStates
-      setButtonStates((prevStates) => ({
-        ...prevStates,
-        ...updatedStates,
-      }));
-
+  // Define an asynchronous function to fetch and update the state
+  const fetchDataAndUpdateState = async () => {
+    const updatedStates = {};
     
-    };
+    // Use Promise.all to wait for all promises to resolve
+    await Promise.all(
+      Object.entries(buttonStates).map(async ([key]) => {
+        const result = await get_control_function(key);
+        updatedStates[key] = Boolean(result);
+      })
+    );
+
+    // Use the functional update form of setButtonStates
+    setButtonStates((prevStates) => ({
+      ...prevStates,
+      ...updatedStates,
+    }));
+
+  
+  };
+
+  React.useState(()=>{
+  
 
     // Call the function
     fetchDataAndUpdateState();
+
+      // Polling interval, adjust as needed
+      const pollingInterval = 1000; // 5 seconds
+
+      const pollingId = setInterval(fetchDataAndUpdateState, pollingInterval);
+  
+      // Clean up the interval when the component is unmounted
+      return () => {
+        clearInterval(pollingId);
+      };
     
   },[buttonStates])
 
   const toggleButton = (buttonName) => {
+
     control_function({
       Name:buttonName, 
       Value:!buttonStates[buttonName]
