@@ -83,7 +83,11 @@ def control_door(data):
             duty_cycle2 = 90 / 18.0 + 2.5
             door_pin_2.ChangeDutyCycle(duty_cycle2)
 
-            time.sleep(3)
+            time.sleep(1)
+            firebaseUpdate("DOOR","data",False)
+            door_pin_1.stop(0)
+            door_pin_1.stop(0)
+        else:
             
             # Move servo 1
             duty_cycle1 = 0 / 18.0 + 2.5
@@ -92,11 +96,11 @@ def control_door(data):
             # Move servo 2
             duty_cycle2 = 0 / 18.0 + 2.5
             door_pin_2.ChangeDutyCycle(duty_cycle2)
-            firebaseUpdate("DOOR","data",False)
-            time.sleep(3)
             
-        door_pin_1.stop(0)
-        door_pin_1.stop(0)
+            time.sleep(1)
+            
+            door_pin_1.stop(0)
+            door_pin_1.stop(0)
             
     except Exception as e:
         print(f"Error in control_door: {e}")
@@ -173,9 +177,10 @@ def main():
         socket.create_connection(("8.8.4.4", 53))
         
         # For control DOOR functions
-        DOOR = threading.Thread(target=control_door_status, args=())
-        DOOR.start()
-        DOOR.join()
+        control_door_status()
+        # DOOR = threading.Thread(target=control_door_status, args=())
+        # DOOR.start()
+        # DOOR.join()
         
         threading.Thread(target=control_lights, args=('OUT_LIGHTS',)).start()
         threading.Thread(target=control_lights, args=('IN_LIGHTS',)).start()
@@ -184,9 +189,10 @@ def main():
         
         time.sleep(0.5)
         return main()
-    except OSError:
+    except:
         print("No Internet")
         time.sleep(0.5)
+        pass
         return main()
             
 
