@@ -29,11 +29,11 @@ for device_pin in home_devices.values():
     GPIO.setup(device_pin, GPIO.OUT)
     
 # ***************** WINDOW FUNCTION ***************** # 
-def move_servo_smoothly(data,name):
+def move_servo_smoothly(data=None,name=None):
     try:
         
         # Initialize servo for door pin
-        window_pin = GPIO.PWM(home_devices['DOOR_PIN_1'], 50)
+        window_pin = GPIO.PWM(home_devices[name], 50)
         window_pin.start(0)
 
         # Open The Door
@@ -42,29 +42,63 @@ def move_servo_smoothly(data,name):
             # Move servo 1
             duty_cycle1 = 180 / 18.0 + 2.5
             window_pin.ChangeDutyCycle(duty_cycle1)
-            time.sleep(1)
+            time.sleep(2)
             window_pin.stop(0)
-
-            
         else:
-            
             # Move servo 1
             duty_cycle1 = 0 / 18.0 + 2.5
             window_pin.ChangeDutyCycle(duty_cycle1)
-            time.sleep(1)
+            time.sleep(2)
             window_pin.stop(0)
-   
-            
-        
             
     except Exception as e:
-        print(f"Error in control_door: {e}")
+        pass
+
     
 def control_window_status(name):
 
     data = get_control_functions(name)
     move_servo_smoothly(data,name)
-    
+
+# ***************** FEEDER FUNCTION ***************** # 
+def feeder_function(data):
+    try:
+        
+        # Initialize servo for door pin
+        feeder_servo = GPIO.PWM(home_devices['PET_FEEDER'], 50)
+  
+        feeder_servo.start(0)
+
+        # Open The Door
+        if data:
+                                        
+            # Move servo 1
+            duty_cycle1 = 90 / 18.0 + 2.5
+            feeder_servo.ChangeDutyCycle(duty_cycle1)
+
+            time.sleep(1)
+            feeder_servo.stop(0)
+            time.sleep(1)
+            firebaseUpdate("PET_FEEDER","data",False)
+            
+        else:
+            
+            # Move servo 1
+            duty_cycle1 = 0 / 18.0 + 2.5
+            feeder_servo.ChangeDutyCycle(duty_cycle1)
+            time.sleep(1)
+            feeder_servo.stop(0)
+                    
+    except Exception as e:
+        pass
+        # print(f"Error in control_door: {e}")
+
+def control_feeder():
+    data = get_control_functions('PET_FEEDER')
+    feeder_function(data)
+
+    time.sleep(0.3)
+    return control_feeder()
 # ***************** DOOR FUNCTION ***************** # 
 def control_door(data):
     try:
@@ -88,10 +122,13 @@ def control_door(data):
             door_pin_2.ChangeDutyCycle(duty_cycle2)
 
             time.sleep(1)
+            door_pin_1.stop(0)
+            door_pin_2.stop(0)
+            
+            time.sleep(3)
             firebaseUpdate("DOOR","data",False)
             
-            door_pin_1.stop(0)
-            door_pin_1.stop(0)
+  
             
         else:
             
@@ -106,10 +143,11 @@ def control_door(data):
             time.sleep(1)
             
             door_pin_1.stop(0)
-            door_pin_1.stop(0)
+            door_pin_2.stop(0)
             
     except Exception as e:
-        print(f"Error in control_door: {e}")
+        pass
+        # print(f"Error in control_door: {e}")
 
 def control_door_status():
     data = get_control_functions('DOOR')
@@ -170,7 +208,8 @@ def rfid_functions():
         register_rdfid(register_status=register, uid=uid)
         
         result = verifiy_rfid(rf_uid=uid)
-        firebaseUpdate("DOOR","data",result)
+        print(result)
+        control_door(result)
             
         print("Access Granted" if result else "Access Denied")
         time.sleep(2)
@@ -188,13 +227,12 @@ def main():
         # For control DOOR functions
         control_door_status()
         
-        control_window_status('WINDOW_1')
-   
+        threading.Thread(target=control_window_status, args=('WINDOW_1',)).start()
+        threading.Thread(target=control_window_status, args=('WINDOW_2',)).start()
+           
         # For Controling Lights  
         threading.Thread(target=control_lights, args=('OUT_LIGHTS',)).start()
         threading.Thread(target=control_lights, args=('IN_LIGHTS',)).start()
-
-        
         
         time.sleep(0.5)
         return main()
@@ -210,6 +248,10 @@ if __name__ == '__main__':
     
     threading.Thread(target=rfid_functions, args=()).start()
     threading.Thread(target=control_water_pump, args=()).start()
+    
+    # For Pet Feeder Function
+    threading.Thread(target=control_feeder, args=()).start()
+
     main()
 
     
