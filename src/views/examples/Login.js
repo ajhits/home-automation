@@ -171,7 +171,7 @@ const Login = async () =>{
                 checked={showPassword}
                       onChange={handleTogglePassword}
                 />
-                <Label check for="forgotPasswordCheckbox"> forgot password </Label>
+                <Label check for="forgotPasswordCheckbox"> show password </Label>
               </FormGroup>
 
               <Row className="m-3">

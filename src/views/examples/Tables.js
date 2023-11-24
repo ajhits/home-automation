@@ -23,7 +23,13 @@ import Header from "components/Headers/Header.js";
 
 import { control_function } from "../../firebase/Database"; 
 import React from "react";
-import { get_register_details, set_new_register, update_RFID } from "../../firebase/Database";
+import { 
+  get_register_details, 
+  set_new_register, 
+  update_RFID,
+  get_registered_functions,
+  delete_registered_user
+} from "../../firebase/Database";
 
 const Tables = () => {
 
@@ -36,6 +42,8 @@ const Tables = () => {
     familiarity: "",
     tagId: ""
   })
+
+  const [registerDetails, setRegisterDetails] = React.useState([]);
 
   const initiate_rfid = e => {
     e.preventDefault()
@@ -69,6 +77,29 @@ const Tables = () => {
     // Run the effect whenever the register state changes
   }, [tagID]);
 
+  React.useEffect(()=>{
+    const fetchRegisterDetails = async () => {
+      try {
+        const data = await get_registered_functions();
+        
+        // Extract unique IDs and store data in the state
+        const keys = Object.keys(data);
+        const dataArray = Object.values(data).map((item, index) => ({
+          id: keys[index],
+          ...item,
+        }));
+
+        setRegisterDetails(dataArray);
+      } catch (error) {
+        console.error("Error fetching register details:", error);
+      }
+    };
+  
+    // Run the effect when the component mounts
+    fetchRegisterDetails();
+
+  },[registerDetails])
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setRegister((prevUser) => ({
@@ -88,6 +119,11 @@ const Tables = () => {
       update_RFID()
       alert("Registered User")
     })
+  }
+
+  const deleteUser = (uid) => {
+  delete_registered_user(uid).then(e=>alert(e)).catch(e=>alert(e))
+
   }
   return (
     <>
@@ -111,12 +147,23 @@ const Tables = () => {
                     <th scope="col">User ID</th>
                     <th scope="col">Name</th>
                     <th scope="col">Familiarity</th>
-                    <th scope="col">Tag Status</th>
+                    <th scope="col">Action</th>
                     <th scope="col" />
                   </tr>
                 </thead>
                 <tbody>
-                  {/* Add your table rows here */}
+
+                  {registerDetails.map((user, index) => (
+                    <tr key={index}>
+                      <td>{user.TagID}</td>
+                      <td>{user.Name}</td>
+                      <td>{user.Familiarity}</td>
+                      <td>{         
+                        <Button color="warning" size="small" onClick={()=>deleteUser(user.id)}>delete</Button>}</td>
+                      {/* Add other columns as needed */}
+                    </tr>
+                  ))}
+
                 </tbody>
               </Table>
 

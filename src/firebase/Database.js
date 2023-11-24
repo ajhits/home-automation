@@ -1,4 +1,4 @@
-import { onValue, push, ref, set } from "firebase/database";
+import { onValue, push, ref, remove, set } from "firebase/database";
 import { RTdb } from "./Configuration";
 
 // **************** CONTROL FUNCTIONS **************** //
@@ -74,4 +74,37 @@ export const update_RFID = async () => {
   } catch (err) {
       console.error(err);
   }
+}
+
+export const get_registered_functions = () => {
+  const keyRef = ref(RTdb, `REGISTERED`);
+
+  return new Promise((resolve, reject) => {
+    onValue(keyRef, (snapshot) => {
+      const data = snapshot.val();
+      resolve(data)
+    }, (error) => {
+      reject(error);
+    });
+  });
+  
+}
+
+export const delete_registered_user = (uid) => {
+
+
+  return new Promise((resolve, reject) => {
+    try {
+      const keyRef = ref(RTdb, `/REGISTERED/${uid}`);
+      
+      remove(keyRef);
+      resolve("Data deleted")
+
+
+  } catch (err) {
+      reject("error deletinf=g")
+      console.error(err);
+  }
+  });
+  
 }
