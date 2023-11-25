@@ -16,17 +16,18 @@ home_devices = {
     'IN_LIGHTS': 16,
     'WINDOW_1': 26,
     'WINDOW_2': 19,
-    'DOOR_PIN_1': 13,
-    'DOOR_PIN_2': 6,
+    'DOOR_PIN_1': 17,
+    'DOOR_PIN_2': 27,
     'WATER_PUMP': 21,
     'PET_FEEDER': 12,
     'BUZZER_PIN': 5
 }
 
-IR_PIN = 25
+IR_PIN = 23
 LDR_PIN = 24
+
 GPIO.setup(IR_PIN, GPIO.IN)
-GPIO.setup(LDR_PIN, GPIO.IN,pull_up_down=GPIO.PUD_UP)
+GPIO.setup(LDR_PIN, GPIO.IN)
 
 reader = SimpleMFRC522()
 
@@ -49,9 +50,24 @@ def control_relay(light_intensity):
         GPIO.output(home_devices['OUT_LIGHTS'], GPIO.LOW)  # Turn off relay
         
 def ldr_function():
-    light_intensity = get_light_intensity()
-    control_relay(light_intensity)
-    time.sleep(1)  # Adjust the sleep duration as needed
+    
+   # Read LDR value
+    ldr_value = GPIO.input(LDR_PIN)
+
+    # If LDR value is high (detects light)
+    if ldr_value == GPIO.HIGH:
+        # Turn on the light
+        GPIO.output(home_devices['OUT_LIGHTS'], GPIO.HIGH)
+        #print("Light is ON")
+
+    # If LDR value is low (no light)
+    else:
+        # Turn off the light
+        GPIO.output(home_devices['OUT_LIGHTS'], GPIO.LOW)
+        #print("Light is OFF")
+
+    # Pause for a moment
+    # time.sleep(1)
 
 
 # ***************** BUZZER FUNCTION ***************** # 
@@ -109,7 +125,7 @@ def feeder_function(data):
             duty_cycle1 = 90 / 18.0 + 2.5
             feeder_servo.ChangeDutyCycle(duty_cycle1)
 
-            time.sleep(1)
+            time.sleep(2)
             feeder_servo.stop(0)
             time.sleep(1)
             firebaseUpdate("PET_FEEDER","data",False)
@@ -119,7 +135,7 @@ def feeder_function(data):
             # Move servo 1
             duty_cycle1 = 0 / 18.0 + 2.5
             feeder_servo.ChangeDutyCycle(duty_cycle1)
-            time.sleep(1)
+            time.sleep(2)
             feeder_servo.stop(0)
                     
     except Exception as e:
@@ -132,22 +148,27 @@ def control_feeder():
 
     time.sleep(0.3)
     return control_feeder()
-# ***************** DOOR FUNCTION ***************** # 
+# ***************** DOOR FUNCTION ***************** #
+
+        
+
+        
 def control_door(data):
     try:
-        
+
         # Initialize servo for door pin
         door_pin_1 = GPIO.PWM(home_devices['DOOR_PIN_1'], 50)
         door_pin_2 = GPIO.PWM(home_devices['DOOR_PIN_2'], 50)
        
         door_pin_1.start(0)
         door_pin_2.start(0)
-        
+
         # Open The Door
-        if data:
-                                        
+        if data == True:
+            
+  
             # Move servo 1
-            duty_cycle1 = 90 / 18.0 + 2.5
+            duty_cycle1 = 0 / 18.0 + 2.5
             door_pin_1.ChangeDutyCycle(duty_cycle1)
 
             # Move servo 2
@@ -160,13 +181,11 @@ def control_door(data):
             
             time.sleep(3)
             firebaseUpdate("DOOR","data",False)
-            
-  
-            return
+        
         else:
             
             # Move servo 1
-            duty_cycle1 = 0 / 18.0 + 2.5
+            duty_cycle1 = 90 / 18.0 + 2.5
             door_pin_1.ChangeDutyCycle(duty_cycle1)
 
             # Move servo 2
@@ -177,21 +196,33 @@ def control_door(data):
             
             door_pin_1.stop(0)
             door_pin_2.stop(0)
-            
 
-        door_pin_1.stop(0)
-        door_pin_2.stop(0)
+        
             
     except Exception as e:
         pass
+                
+        door_pin_1.stop(0)
+        door_pin_2.stop(0)
         # print(f"Error in control_door: {e}")
 
 def control_door_status():
+    
+    # Initialize servo for door pin
     data = get_control_functions('DOOR')
+    time.sleep(0.2)
     control_door(data)
+
+        
 
 # ***************** LIGHTS ***************** #
 def control_lights(name):
+    
+    ldr_value = GPIO.input(LDR_PIN)
+    
+    if ldr_value == GPIO.HIGH and name == "OUT_LIGHTS":
+        return
+    
     # get data from firebase
     data = get_control_functions(name)
     GPIO.output(home_devices[name], data)
@@ -249,12 +280,13 @@ def rfid_functions():
         # RFID RESULT
         result = verifiy_rfid(rf_uid=uid)
         
-        # IRE RESULT
+        # IR RESULT
         object_detected = GPIO.input(IR_PIN)
+        print(object_detected)
         
-        activate_buzzer(0.3) if result else activate_buzzer(3)
+        activate_buzzer(0.3) if result and object_detected==0 else activate_buzzer(3)
 
-        firebaseUpdate("DOOR","data",result)
+        firebaseUpdate("DOOR","data",result and object_detected==0)
     
         print("Access Granted" if result else "Access Denied")
         
@@ -272,14 +304,17 @@ def main():
         
         # For control DOOR functions
         control_door_status()
+        #threading.Thread(target=control_door_status, args=()).start()
         
         threading.Thread(target=control_window_status, args=('WINDOW_1',)).start()
+        time.sleep(0.3)
         threading.Thread(target=control_window_status, args=('WINDOW_2',)).start()
-        
+        time.sleep(0.3)
         threading.Thread(target=ldr_function, args=()).start()
            
         # For Controling Lights  
         threading.Thread(target=control_lights, args=('OUT_LIGHTS',)).start()
+        time.sleep(0.3)
         threading.Thread(target=control_lights, args=('IN_LIGHTS',)).start()
         
         time.sleep(0.5)
@@ -292,12 +327,14 @@ def main():
             
 if __name__ == '__main__':
     print("Smart Home is Running")
-    
+
+        
     threading.Thread(target=rfid_functions, args=()).start()
     threading.Thread(target=control_water_pump, args=()).start()
     
     # For Pet Feeder Function
     threading.Thread(target=control_feeder, args=()).start()
+    
 
     main()
 
