@@ -132,15 +132,15 @@ def feeder_function(data):
         # Open The Door
         if data:
                                         
-            # Move servo 1 | 90
-            pwm.set_servo_pulsewidth(home_devices['PET_FEEDER'], 1500 ) ;
+            # Move servo 1 | 0
+            pwm.set_servo_pulsewidth(home_devices['PET_FEEDER'], 500 ) ;
             time.sleep(3)
             firebaseUpdate("PET_FEEDER","data",False)
             
         else:
             
-            # Move servo 1 | 0
-            pwm.set_servo_pulsewidth(home_devices['PET_FEEDER'], 500 ) ;
+            # Move servo 1 | 90
+            pwm.set_servo_pulsewidth(home_devices['PET_FEEDER'], 1500 ) ;
 
                     
     except Exception as e:
@@ -173,7 +173,8 @@ def control_door(data):
         else:
             
             # Move servo 1 | 90
-            pwm.set_servo_pulsewidth(home_devices['DOOR_PIN_1'], 1500) ;
+            pwm.set_servo_pulsewidth(home_devices['DOOR_PIN_1'], 1600) ;
+            time.sleep(0.4)
 
             # Move servo 2 | 0
             pwm.set_servo_pulsewidth(home_devices['DOOR_PIN_2'], 500) ;
