@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Home Automation
+Terminal=true
+Exec="/usr/bin/python3" "/home/raspberrypi/Desktop/home-automation-raspberry/App.py"
+Icon=/home/raspberrypi/Downloads/logo512.png
