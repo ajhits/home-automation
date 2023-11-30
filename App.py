@@ -57,6 +57,11 @@ pwm.set_mode(home_devices['DOOR_PIN_2'], pigpio.OUTPUT)
 pwm.set_PWM_frequency(home_devices['DOOR_PIN_1'], 50 )
 pwm.set_PWM_frequency(home_devices['DOOR_PIN_2'], 50 )
 
+# Feed Servo
+pwm.set_mode(home_devices['PET_FEEDER'], pigpio.OUTPUT)
+
+pwm.set_PWM_frequency(home_devices['PET_FEEDER'], 50 )
+
 # ***************** LDR FUNCTION ***************** # 
 def get_light_intensity():
     # Read LDR sensor value (0 for dark, 1 for light)
@@ -123,31 +128,20 @@ def control_window_status(name):
 # ***************** FEEDER FUNCTION ***************** # 
 def feeder_function(data):
     try:
-        
-        # Initialize servo for door pin
-        feeder_servo = GPIO.PWM(home_devices['PET_FEEDER'], 50)
-  
-        feeder_servo.start(0)
 
         # Open The Door
         if data:
                                         
-            # Move servo 1
-            duty_cycle1 = 90 / 18.0 + 2.5
-            feeder_servo.ChangeDutyCycle(duty_cycle1)
-
-            time.sleep(2)
-            feeder_servo.stop(0)
-            time.sleep(1)
+            # Move servo 1 | 90
+            pwm.set_servo_pulsewidth(home_devices['PET_FEEDER'], 1500 ) ;
+            time.sleep(3)
             firebaseUpdate("PET_FEEDER","data",False)
             
         else:
             
-            # Move servo 1
-            duty_cycle1 = 0 / 18.0 + 2.5
-            feeder_servo.ChangeDutyCycle(duty_cycle1)
-            time.sleep(2)
-            feeder_servo.stop(0)
+            # Move servo 1 | 0
+            pwm.set_servo_pulsewidth(home_devices['PET_FEEDER'], 500 ) ;
+
                     
     except Exception as e:
         pass
@@ -194,9 +188,7 @@ def control_door_status():
     # Initialize servo for door pin
     data = get_control_functions('DOOR')
     time.sleep(0.2)
-    control_door(data)
-
-        
+    control_door(data)      
 
 # ***************** LIGHTS ***************** #
 def control_lights(name):
