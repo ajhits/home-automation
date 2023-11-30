@@ -42,11 +42,20 @@ for device_pin in home_devices.values():
 GPIO.output(home_devices['BUZZER_PIN'], GPIO.LOW)
 
 pwm = pigpio.pi()
+
+# Window Servo
 pwm.set_mode(home_devices['WINDOW_1'], pigpio.OUTPUT)
 pwm.set_mode(home_devices['WINDOW_2'], pigpio.OUTPUT)
 
 pwm.set_PWM_frequency(home_devices['WINDOW_1'], 50 )
 pwm.set_PWM_frequency(home_devices['WINDOW_2'], 50 )
+
+# Door Servo
+pwm.set_mode(home_devices['DOOR_PIN_1'], pigpio.OUTPUT)
+pwm.set_mode(home_devices['DOOR_PIN_2'], pigpio.OUTPUT)
+
+pwm.set_PWM_frequency(home_devices['DOOR_PIN_1'], 50 )
+pwm.set_PWM_frequency(home_devices['DOOR_PIN_2'], 50 )
 
 # ***************** LDR FUNCTION ***************** # 
 def get_light_intensity():
@@ -80,7 +89,6 @@ def ldr_function():
     # Pause for a moment
     # time.sleep(1)
 
-
 # ***************** BUZZER FUNCTION ***************** # 
 def activate_buzzer(duration):
     GPIO.output(home_devices['BUZZER_PIN'], GPIO.HIGH)
@@ -106,8 +114,7 @@ def move_servo_smoothly(data=None,name=None):
             
     except Exception as e:
         pass
-
-    
+   
 def control_window_status(name):
 
     data = get_control_functions(name)
@@ -152,63 +159,35 @@ def control_feeder():
 
     time.sleep(0.3)
     return control_feeder()
+
 # ***************** DOOR FUNCTION ***************** #
-
-        
-
-        
 def control_door(data):
     try:
-
-        # Initialize servo for door pin
-        door_pin_1 = GPIO.PWM(home_devices['DOOR_PIN_1'], 50)
-        door_pin_2 = GPIO.PWM(home_devices['DOOR_PIN_2'], 50)
-       
-        door_pin_1.start(0)
-        door_pin_2.start(0)
 
         # Open The Door
         if data == True:
             
-  
-            # Move servo 1
-            duty_cycle1 = 0 / 18.0 + 2.5
-            door_pin_1.ChangeDutyCycle(duty_cycle1)
+            # Move servo 1 | 0
+            pwm.set_servo_pulsewidth(home_devices['DOOR_PIN_1'], 500) ;
 
-            # Move servo 2
-            duty_cycle2 = 90 / 18.0 + 2.5
-            door_pin_2.ChangeDutyCycle(duty_cycle2)
-
-            time.sleep(1)
-            door_pin_1.stop(0)
-            door_pin_2.stop(0)
+            # Move servo 2 | 90
+            pwm.set_servo_pulsewidth(home_devices['DOOR_PIN_2'], 1500) ;
             
             time.sleep(3)
             firebaseUpdate("DOOR","data",False)
         
         else:
             
-            # Move servo 1
-            duty_cycle1 = 90 / 18.0 + 2.5
-            door_pin_1.ChangeDutyCycle(duty_cycle1)
+            # Move servo 1 | 90
+            pwm.set_servo_pulsewidth(home_devices['DOOR_PIN_1'], 1500) ;
 
-            # Move servo 2
-            duty_cycle2 = 0 / 18.0 + 2.5
-            door_pin_2.ChangeDutyCycle(duty_cycle2)
-            
-            time.sleep(1)
-            
-            door_pin_1.stop(0)
-            door_pin_2.stop(0)
+            # Move servo 2 | 0
+            pwm.set_servo_pulsewidth(home_devices['DOOR_PIN_2'], 500) ;
 
-        
             
     except Exception as e:
         pass
-                
-        door_pin_1.stop(0)
-        door_pin_2.stop(0)
-        # print(f"Error in control_door: {e}")
+        print(f"Error in control_door: {e}")
 
 def control_door_status():
     
