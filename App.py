@@ -4,6 +4,8 @@ import time
 from Firebase.Firebase import get_control_functions, firebaseUpdate,verifiy_rfid
 import socket
 
+import pigpio
+
 from mfrc522 import SimpleMFRC522
 
 # GPIO setup
@@ -31,11 +33,20 @@ GPIO.setup(LDR_PIN, GPIO.IN)
 
 reader = SimpleMFRC522()
 
+
+
 # Setup the Pins
 for device_pin in home_devices.values():
     GPIO.setup(device_pin, GPIO.OUT)
     
 GPIO.output(home_devices['BUZZER_PIN'], GPIO.LOW)
+
+pwm = pigpio.pi()
+pwm.set_mode(home_devices['WINDOW_1'], pigpio.OUTPUT)
+pwm.set_mode(home_devices['WINDOW_2'], pigpio.OUTPUT)
+
+pwm.set_PWM_frequency(home_devices['WINDOW_1'], 50 )
+pwm.set_PWM_frequency(home_devices['WINDOW_2'], 50 )
 
 # ***************** LDR FUNCTION ***************** # 
 def get_light_intensity():
@@ -80,25 +91,18 @@ def activate_buzzer(duration):
 # ***************** WINDOW FUNCTION ***************** # 
 def move_servo_smoothly(data=None,name=None):
     try:
-        
-        # Initialize servo for door pin
-        window_pin = GPIO.PWM(home_devices[name], 50)
-        window_pin.start(0)
 
         # Open The Door
         if data:
                                         
-            # Move servo 1
-            duty_cycle1 = 180 / 18.0 + 2.5
-            window_pin.ChangeDutyCycle(duty_cycle1)
-            time.sleep(2)
-            window_pin.stop(0)
+            # Move servo 1 | 180
+            pwm.set_servo_pulsewidth(home_devices[name], 2500) ;
+            time.sleep( 3 )
         else:
-            # Move servo 1
-            duty_cycle1 = 0 / 18.0 + 2.5
-            window_pin.ChangeDutyCycle(duty_cycle1)
-            time.sleep(2)
-            window_pin.stop(0)
+            
+            # Move servo 1 | 0
+            pwm.set_servo_pulsewidth(home_devices[name], 500) ;
+            time.sleep( 3 )
             
     except Exception as e:
         pass
