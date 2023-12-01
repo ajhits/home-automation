@@ -1,7 +1,7 @@
 import threading
 import RPi.GPIO as GPIO
 import time
-from Firebase.Firebase import get_control_functions, firebaseUpdate,verifiy_rfid
+from Firebase.Firebase import get_control_functions, firebaseUpdate,verifiy_rfid, update_history
 import socket
 
 import pigpio
@@ -131,6 +131,8 @@ def feeder_function(data):
 
         # Open The Door
         if data:
+            
+            update_history("PET_FEEDER")
                                         
             # Move servo 1 | 0
             pwm.set_servo_pulsewidth(home_devices['PET_FEEDER'], 500 ) ;
@@ -150,6 +152,7 @@ def feeder_function(data):
 def control_feeder():
     data = get_control_functions('PET_FEEDER')
     feeder_function(data)
+    
 
     time.sleep(0.3)
     return control_feeder()
@@ -263,6 +266,9 @@ def rfid_functions():
         activate_buzzer(0.3) if result and object_detected==0 else activate_buzzer(3)
 
         firebaseUpdate("DOOR","data",result and object_detected==0)
+        
+        # Updated Code
+        result and object_detected == 0 and update_history("DOOR")
     
         print("Access Granted" if result else "Access Denied")
         

@@ -1,5 +1,8 @@
 import pyrebase
 import os
+from datetime import datetime
+
+
 
 # firebase API keys
 config = {
@@ -52,3 +55,33 @@ def verifiy_rfid(rf_uid):
   except Exception as e:
     print(f"Error: {e}")
     return False
+
+# **** NOTE: updated Code
+
+# update history
+def update_history(keyName):
+    
+    try:
+        # Get current date and time
+        now = datetime.now()
+    
+        # Format the date as 'Month day Year' (e.g., 'Dec 1 2023')
+        formatted_date = now.strftime('%b %d %Y')
+
+        # Format the time as 'hour:minute AM/PM' (e.g., '7:16 PM')
+        formatted_time = now.strftime('%I:%M %p')
+        
+        db.child("HISTORY").child(keyName).push(
+          {
+            "date": str(formatted_date),
+            "time": str(formatted_time)                                   
+          })
+    
+
+    
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+    
+
+
