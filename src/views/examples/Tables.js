@@ -54,36 +54,73 @@ const Tables = () => {
     })
 
     setReq(!req)
+
+    !req === false && update_RFID();
+
   }
 
+  const updated_tables = async () =>{
+
+    // Fetch registered functions
+    const registerDetailsResponse = await get_registered_functions();
+
+    // Extract unique IDs and store data in the state
+    const keys = Object.keys(registerDetailsResponse);
+    const dataArray = Object.values(registerDetailsResponse).map((item, index) => ({
+        id: keys[index],
+        ...item,
+      }));
+
+    setRegisterDetails(dataArray);
+
+  }
+
+
+  const fetchData = async () => {
+    try {
+      // Fetch RFID tag ID
+      const tagIdResponse = await get_register_details("RFID");
+      setTagID({
+        tagId: tagIdResponse.rf_uid,
+        data: tagIdResponse.data,
+      });
+       
+      console.log("Data fethed")
+
+
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
   React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch RFID tag ID
-        const tagIdResponse = await get_register_details("RFID");
-        setTagID({
-          tagId: tagIdResponse.rf_uid,
-          data: tagIdResponse.data,
-        });
 
-        // Fetch registered functions
-        const registerDetailsResponse = await get_registered_functions();
+    updated_tables();
 
-        // Extract unique IDs and store data in the state
-        const keys = Object.keys(registerDetailsResponse);
-        const dataArray = Object.values(registerDetailsResponse).map((item, index) => ({
-          id: keys[index],
-          ...item,
-        }));
 
-        setRegisterDetails(dataArray);
-      } catch (error) {
-        console.error("Error fetching data:", error);
+    // Check every second if req is true
+    const intervalId = setInterval(() => {
+      if (req){
+        fetchData();
       }
-    };
 
-    fetchData();
-  }, [tagID,registerDetails]); // Run only once when the component mounts
+    }, 200);
+
+    // Clean up the interval on component unmount
+    return () => {
+      clearInterval(intervalId);
+    }
+
+  }, [req,tagID]);
+
+
+   // Effect for running update_RFID when component unmounts
+   React.useEffect(() => {
+    return () => {
+      update_RFID();
+    };
+  }, []);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -102,13 +139,23 @@ const Tables = () => {
       Familiarity: register.familiarity
     }).then(e=>{
       update_RFID()
+
       alert("Registered User")
+      
+      updated_tables();
+      setRegister({
+        name: "",
+        familiarity: "",
+        tagId: ""
+      })
+      setReq(false)
+
     })
   }
 
   const deleteUser = (uid) => {
-  delete_registered_user(uid).then(e=>alert(e)).catch(e=>alert(e))
-
+    delete_registered_user(uid).then(e=>alert(e)).catch(e=>alert(e))
+    updated_tables();
   }
   return (
     <>
