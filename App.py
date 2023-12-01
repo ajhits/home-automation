@@ -8,6 +8,7 @@ import pigpio
 
 from mfrc522 import SimpleMFRC522
 
+#new
 # GPIO setup
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
