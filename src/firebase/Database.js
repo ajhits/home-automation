@@ -108,3 +108,18 @@ export const delete_registered_user = (uid) => {
   });
   
 }
+
+// **************** GET THE NUMBER OF SHITS  **************** //
+export const get_the_number_of_shits = (Name="HISTORY") => {
+  const keyRef = ref(RTdb, `${Name}/`);
+
+  return new Promise((resolve, reject) => {
+    onValue(keyRef, (snapshot) => {
+      const data = snapshot.val();
+      resolve(data)
+    }, (error) => {
+      reject(error);
+    });
+  });
+  
+}

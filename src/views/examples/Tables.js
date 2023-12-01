@@ -1,4 +1,4 @@
-// ...
+// ... REGISTERED USER ETO
 
 import {
   // Badge,

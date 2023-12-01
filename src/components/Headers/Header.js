@@ -17,9 +17,37 @@
 */
 
 // reactstrap components
+import React from "react";
+import { get_the_number_of_shits } from "../../firebase/Database";
 import { Card, CardBody, CardTitle, Container, Row, Col } from "reactstrap";
 
 const Header = () => {
+
+  const [door,setDoor] = React.useState(0)
+  const [feeding,setFeeding] = React.useState(0)
+  const [registered,setRegistered] = React.useState(0)
+
+  React.useEffect(()=>{
+    const NumberOfEntries = async () =>{
+
+      const data = await get_the_number_of_shits()
+
+
+      setDoor(Object.values(data.DOOR).length)
+      setFeeding(Object.values(data.PET_FEEDER).length)
+    }
+
+    const NumberOfUser = async () => {
+      const data = await get_the_number_of_shits("REGISTERED")
+
+      setRegistered(Object.values(data).length)
+    }
+
+    NumberOfEntries();
+    NumberOfUser();
+  },[door,feeding,registered])
+
+
   return (
     <>
       <div className="header bg-gradient-info pb-8 pt-5 pt-md-8">
@@ -39,7 +67,7 @@ const Header = () => {
                           Number of Entries
                         </CardTitle>
                         <span className="h2 font-weight-bold mb-0">
-                          25
+                          {door}
                         </span>
                       </div>
                       <Col className="col-auto">
@@ -63,7 +91,9 @@ const Header = () => {
                         >
                           Users
                         </CardTitle>
-                        <span className="h2 font-weight-bold mb-0">6</span>
+                        <span className="h2 font-weight-bold mb-0">
+                          {registered}
+                        </span>
                       </div>
                       <Col className="col-auto">
                         <div className="icon icon-shape bg-warning text-white rounded-circle shadow">
@@ -86,7 +116,7 @@ const Header = () => {
                         >
                           Feeding Count
                         </CardTitle>
-                        <span className="h2 font-weight-bold mb-0">250</span>
+                        <span className="h2 font-weight-bold mb-0">{feeding}</span>
                       </div>
                       <Col className="col-auto">
                         <div className="icon icon-shape bg-yellow text-white rounded-circle shadow">
