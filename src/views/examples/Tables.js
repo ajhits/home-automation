@@ -57,48 +57,33 @@ const Tables = () => {
   }
 
   React.useEffect(() => {
-    const fetchRegisterDetails = async () => {
+    const fetchData = async () => {
       try {
-        const tagId = await get_register_details("RFID");
-        setTagID((prevRegister) => ({
-          ...prevRegister,
-          tagId: tagId.rf_uid,
-        }));
-        
-        setReq(tagId.data)
-      } catch (error) {
-        console.error("Error fetching register details:", error);
-      }
-    };
-  
-    // Run the effect when the component mounts
-    fetchRegisterDetails();
-  
-    // Run the effect whenever the register state changes
-  }, [tagID]);
+        // Fetch RFID tag ID
+        const tagIdResponse = await get_register_details("RFID");
+        setTagID({
+          tagId: tagIdResponse.rf_uid,
+          data: tagIdResponse.data,
+        });
 
-  React.useEffect(()=>{
-    const fetchRegisterDetails = async () => {
-      try {
-        const data = await get_registered_functions();
-        
+        // Fetch registered functions
+        const registerDetailsResponse = await get_registered_functions();
+
         // Extract unique IDs and store data in the state
-        const keys = Object.keys(data);
-        const dataArray = Object.values(data).map((item, index) => ({
+        const keys = Object.keys(registerDetailsResponse);
+        const dataArray = Object.values(registerDetailsResponse).map((item, index) => ({
           id: keys[index],
           ...item,
         }));
 
         setRegisterDetails(dataArray);
       } catch (error) {
-        console.error("Error fetching register details:", error);
+        console.error("Error fetching data:", error);
       }
     };
-  
-    // Run the effect when the component mounts
-    fetchRegisterDetails();
 
-  },[registerDetails])
+    fetchData();
+  }, [tagID,registerDetails]); // Run only once when the component mounts
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
