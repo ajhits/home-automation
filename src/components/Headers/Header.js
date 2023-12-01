@@ -22,30 +22,63 @@ import { get_the_number_of_shits } from "../../firebase/Database";
 import { Card, CardBody, CardTitle, Container, Row, Col } from "reactstrap";
 
 const Header = () => {
+  const [door, setDoor] = React.useState(0);
+  const [feeding, setFeeding] = React.useState(0);
+  const [registered, setRegistered] = React.useState(0);
 
-  const [door,setDoor] = React.useState(0)
-  const [feeding,setFeeding] = React.useState(0)
-  const [registered,setRegistered] = React.useState(0)
+  const sendTextToTelegram = () => {
+    var telegram_bot_id = "6874065354:AAHgmF_sERvDRoMQW0QNBYSY4OPxj7rV3HE";
+    var chat_id = 6145248365;
+    
+    // Get the current date and time in the local timezone
+    var currentDate = new Date();
+    var formattedDate = currentDate.toLocaleString();
+  
+    // The text message you want to send
+    var textMessage = "Door Opened: " + formattedDate;
+  
+    // Create a FormData object to send the text message
+    var formData = new FormData();
+    formData.append('chat_id', chat_id);
+    formData.append('text', textMessage);
+  
+    // Send the text message to the Telegram Bot API using Ajax
+    fetch('https://api.telegram.org/bot' + telegram_bot_id + '/sendMessage', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+    })
+    .catch(error => {
+      console.error(error);
+    });
+  };
+  
 
-  React.useEffect(()=>{
-    const NumberOfEntries = async () =>{
+  React.useEffect(() => {
+    const NumberOfEntries = async () => {
+      const data = await get_the_number_of_shits();
 
-      const data = await get_the_number_of_shits()
+      setDoor(Object.values(data.DOOR).length);
+      setFeeding(Object.values(data.PET_FEEDER).length);
 
-
-      setDoor(Object.values(data.DOOR).length)
-      setFeeding(Object.values(data.PET_FEEDER).length)
-    }
+      // Check if the number of entries has increased (you can adjust the condition based on your logic)
+      if (Object.values(data.DOOR).length > door) {
+        // Call the function to send a text message to Telegram
+        sendTextToTelegram();
+      }
+    };
 
     const NumberOfUser = async () => {
-      const data = await get_the_number_of_shits("REGISTERED")
-
-      setRegistered(Object.values(data).length)
-    }
+      const data = await get_the_number_of_shits("REGISTERED");
+      setRegistered(Object.values(data).length);
+    };
 
     NumberOfEntries();
     NumberOfUser();
-  },[door,feeding,registered])
+  }, [door, feeding, registered]);
 
 
   return (
@@ -137,9 +170,9 @@ const Header = () => {
                           tag="h5"
                           className="text-uppercase text-muted mb-0"
                         >
-                          Active Lights
+                          Working Lights
                         </CardTitle>
-                        <span className="h2 font-weight-bold mb-0">2</span>
+                        <span className="h3 font-weight-bold mb-0">Outdoor/Indoor</span>
                       </div>
                       <Col className="col-auto">
                         <div className="icon icon-shape bg-info text-white rounded-circle shadow">
