@@ -30,6 +30,41 @@ const Icons = () => {
   const temperature = 25; // in Celsius
   const humidity = 50; // in percentage
 
+  const sendTextToTelegram = () => {
+    var telegram_bot_id = "6874065354:AAHgmF_sERvDRoMQW0QNBYSY4OPxj7rV3HE";
+    var chat_ids = [6145248365, 1063095169,1120054024]; // Add your additional chat IDs here
+    
+    // Get the current date and time in the local timezone
+    var currentDate = new Date();
+    var formattedDate = currentDate.toLocaleString();
+    
+    // The text message for the alarm activation
+    var textMessage = "Alarm Activated: " + formattedDate;
+    
+    // Iterate over each chat ID and send the message
+    chat_ids.forEach(chat_id => {
+      // Create a new FormData object for each iteration
+      var formData = new FormData();
+      formData.append('chat_id', chat_id);
+      formData.append('text', textMessage);
+  
+      // Send the text message to the Telegram Bot API using Ajax
+      fetch('https://api.telegram.org/bot' + telegram_bot_id + '/sendMessage', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+    });
+  };
+  
+  
+  
 
   // Define an asynchronous function to fetch and update the state
   const fetchDataAndUpdateState = async () => {
@@ -107,7 +142,7 @@ const Icons = () => {
                       >
                         {buttonStates.OUT_LIGHTS ? "On" : "Off"}
                       </Button>
-                      <p>outdoor lights</p>
+                      <p>Outdoor lights</p>
                     </div>
                   </Col>
 
@@ -120,7 +155,7 @@ const Icons = () => {
                       >
                         {buttonStates.IN_LIGHTS ? "On" : "Off"}
                       </Button>
-                      <p>indoor lights</p>
+                      <p>Indoor lights</p>
                     </div>
                   </Col>
 
@@ -186,6 +221,20 @@ const Icons = () => {
                       <p>Pet Feeder</p>
                     </div>
                   </Col>
+                  <Col md="3" xs="12">
+                    <div className="text-center">
+                    <Button
+                     color={buttonStates.ALARM ? "success" : "primary"}
+                     onClick={sendTextToTelegram}
+                    >
+                    Trigger
+                    </Button>
+                   <p>Alarm</p>
+                    </div>
+                  </Col>
+
+
+                  
                  
                 </Row>
 
