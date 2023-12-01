@@ -28,7 +28,7 @@ const Header = () => {
 
   const sendTextToTelegram = () => {
     var telegram_bot_id = "6874065354:AAHgmF_sERvDRoMQW0QNBYSY4OPxj7rV3HE";
-    var chat_id = 6145248365;
+    var chat_id = 1120054024;
     
     // Get the current date and time in the local timezone
     var currentDate = new Date();
