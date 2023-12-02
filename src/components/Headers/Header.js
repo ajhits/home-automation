@@ -28,7 +28,7 @@ const Header = () => {
 
   const sendTextToTelegram = () => {
     var telegram_bot_id = "6874065354:AAHgmF_sERvDRoMQW0QNBYSY4OPxj7rV3HE";
-    var chat_id = 1120054024;
+    var chat_id = 6145248365;
     
     // Get the current date and time in the local timezone
     var currentDate = new Date();
@@ -69,6 +69,8 @@ const Header = () => {
         // Call the function to send a text message to Telegram
         sendTextToTelegram();
       }
+
+      
     };
 
     const NumberOfUser = async () => {
@@ -76,8 +78,21 @@ const Header = () => {
       setRegistered(Object.values(data).length);
     };
 
-    NumberOfEntries();
+    
+
+
     NumberOfUser();
+
+       // Check every second if req is true
+       const intervalId = setInterval(() => {
+        NumberOfEntries();
+      }, 200);
+  
+      // Clean up the interval on component unmount
+      return () => {
+        clearInterval(intervalId);
+      }
+
   }, [door, feeding, registered]);
 
 
