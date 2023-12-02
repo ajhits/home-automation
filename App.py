@@ -16,6 +16,7 @@ GPIO.setwarnings(False)
 # GPIO PIN SETUP
 home_devices = {
     'OUT_LIGHTS': 20,
+    'LAMP': 18,
     'IN_LIGHTS': 16,
     'WINDOW_1': 26,
     'WINDOW_2': 19,
@@ -83,6 +84,7 @@ def ldr_function():
     # If LDR value is high (detects light)
     if ldr_value == GPIO.HIGH:
         # Turn on the light
+        GPIO.output(home_devices['LAMP'], GPIO.HIGH)
         GPIO.output(home_devices['OUT_LIGHTS'], GPIO.HIGH)
         #print("Light is ON")
 
@@ -90,6 +92,7 @@ def ldr_function():
     else:
         # Turn off the light
         GPIO.output(home_devices['OUT_LIGHTS'], GPIO.LOW)
+        GPIO.output(home_devices['LAMP'], GPIO.LOW)
         #print("Light is OFF")
 
     # Pause for a moment
@@ -203,9 +206,14 @@ def control_lights(name):
     if ldr_value == GPIO.HIGH and name == "OUT_LIGHTS":
         return
     
+
     # get data from firebase
     data = get_control_functions(name)
+    
+    name == "OUT_LIGHTS" and GPIO.output(home_devices['LAMP'], data)
     GPIO.output(home_devices[name], data)
+    
+    
     
 # ***************** WATER PUMP ***************** #
 def control_water_pump():
@@ -257,12 +265,18 @@ def rfid_functions():
         register = get_control_functions("RFID")
         register_rdfid(register_status=register, uid=uid)
         
+        print(register)
+        if register:
+            activate_buzzer(0.3)
+            return rfid_functions()
+ 
+        
         # RFID RESULT
         result = verifiy_rfid(rf_uid=uid)
         
         # IR RESULT
         object_detected = GPIO.input(IR_PIN)
-        print(object_detected)
+       
         
         activate_buzzer(0.3) if result and object_detected==0 else activate_buzzer(3)
 
@@ -321,4 +335,4 @@ if __name__ == '__main__':
 
     main()
 
-    
+     
