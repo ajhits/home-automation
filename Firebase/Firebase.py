@@ -44,9 +44,10 @@ def verifiy_rfid(rf_uid):
     
     for key,value in data.items():
       if value['TagID'] == rf_uid:
-          return True
+
+          return (value['Name'],True)
     
-    return False
+    return (None,False)
       
         
     
@@ -54,7 +55,7 @@ def verifiy_rfid(rf_uid):
         
   except Exception as e:
     print(f"Error: {e}")
-    return False
+    return (None,False)
 
 # **** NOTE: updated Code
 
@@ -73,6 +74,32 @@ def update_history(keyName):
         
         db.child("HISTORY").child(keyName).push(
           {
+            "date": str(formatted_date),
+            "time": str(formatted_time)                                   
+          })
+    
+
+    
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+  
+# update history
+def update_history_door(Name):
+    
+    try:
+        # Get current date and time
+        now = datetime.now()
+    
+        # Format the date as 'Month day Year' (e.g., 'Dec 1 2023')
+        formatted_date = now.strftime('%b %d %Y')
+
+        # Format the time as 'hour:minute AM/PM' (e.g., '7:16 PM')
+        formatted_time = now.strftime('%I:%M %p')
+        
+        db.child("HISTORY").child("DOOR").push(
+          {
+            "name": Name,
             "date": str(formatted_date),
             "time": str(formatted_time)                                   
           })

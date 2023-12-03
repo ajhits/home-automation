@@ -1,7 +1,7 @@
 import threading
 import RPi.GPIO as GPIO
 import time
-from Firebase.Firebase import get_control_functions, firebaseUpdate,verifiy_rfid, update_history
+from Firebase.Firebase import get_control_functions, firebaseUpdate,verifiy_rfid, update_history,update_history_door
 import socket
 
 import pigpio
@@ -278,14 +278,14 @@ def rfid_functions():
         object_detected = GPIO.input(IR_PIN)
        
         
-        activate_buzzer(0.3) if result and object_detected==0 else activate_buzzer(3)
+        activate_buzzer(0.3) if result[1] and object_detected==0 else activate_buzzer(3)
 
-        firebaseUpdate("DOOR","data",result and object_detected==0)
+        firebaseUpdate("DOOR","data",result[1] and object_detected==0)
         
         # Updated Code
-        result and object_detected == 0 and update_history("DOOR")
+        result[1] and object_detected == 0 and update_history_door(result[0])
     
-        print("Access Granted" if result else "Access Denied")
+        print("Access Granted" if result[1] else "Access Denied")
         
         time.sleep(2)
         
