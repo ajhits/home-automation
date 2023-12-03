@@ -47,6 +47,7 @@ import {
 } from "variables/charts.js";
 
 import Header from "components/Headers/Header.js";
+import { Card, CardHeader, Row, Table } from "reactstrap";
 
 const Index = (props) => {
   // const [activeNav, setActiveNav] = useState(1);
@@ -67,6 +68,47 @@ const Index = (props) => {
       <Header />
       {/* Page content */}
       
+              {/* Table */}
+              <Row>
+          <div className="col">
+            <Card className="shadow">
+
+              <CardHeader className="border-0">
+                <h3 className="mb-0">Entry Log</h3>
+              </CardHeader>
+
+              <Table className="align-items-center table-flush" responsive>
+                <thead className="thead-light">
+                  <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Date and Time</th>
+                    <th scope="col" />
+                  </tr>
+                </thead>
+                <tbody>
+
+                  {/* {registerDetails.map((user, index) => (
+                    <tr key={index}>
+                      <td>{user.TagID}</td>
+                      <td>{user.Name}</td>
+                      <td>{user.Familiarity}</td>
+                      <td>{         
+                        <Button color="warning" size="small" onClick={()=>deleteUser(user.id)}>delete</Button>}</td>
+
+                    </tr>
+                  ))} */}
+
+                </tbody>
+              </Table>
+
+ 
+
+            </Card>
+
+
+
+          </div>
+        </Row>
     </>
   );
 };
