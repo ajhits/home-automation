@@ -63,8 +63,7 @@ const Icons = () => {
     });
   };
   
-  
-  
+
 
   // Define an asynchronous function to fetch and update the state
   const fetchDataAndUpdateState = async () => {

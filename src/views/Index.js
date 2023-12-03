@@ -1,25 +1,12 @@
 
 import React from "react";
 
-// import Chart from "chart.js";
-
-// import {
-//   chartOptions,
-//   parseOptions,
-//   // chartExample1,
-//   // chartExample2,
-// } from "variables/charts.js";
-
 import Header from "components/Headers/Header.js";
 import { Card, CardHeader, Container, Row, Table } from "reactstrap";
 import { get_the_number_of_shits } from "../firebase/Database";
 
 const Index = () => {
 
-
-  // if (window.Chart) {
-  //   parseOptions(Chart, chartOptions());
-  // }
 
   const [data,setData] = React.useState()
   
