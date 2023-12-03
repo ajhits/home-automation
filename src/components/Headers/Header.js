@@ -67,6 +67,7 @@ const Header = () => {
       // Check if the number of entries has increased (you can adjust the condition based on your logic)
       if (Object.values(data.DOOR).length > door) {
         // Call the function to send a text message to Telegram
+      
         sendTextToTelegram();
       }
 
