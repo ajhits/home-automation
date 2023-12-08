@@ -11,7 +11,20 @@ const Index = () => {
   const [data,setData] = React.useState()
   
   React.useEffect(()=>{
-    get_the_number_of_shits().then(data=>setData(data.DOOR))
+    get_the_number_of_shits()
+    .then(data=>{
+
+         // Assuming data is an array of objects with "date" and "time" properties
+         const sortedData = Object.values(data.DOOR).sort((a, b) => {
+          const dateA = new Date(`${a.date} ${a.time}`);
+          const dateB = new Date(`${b.date} ${b.time}`);
+          return dateB - dateA; // Sort in descending order (most recent first)
+        });
+
+      setData(sortedData)
+
+
+    })
   },[])
 
 
@@ -42,7 +55,7 @@ const Index = () => {
                 </thead>
                 <tbody>
 
-                  {data && Object.values(data)?.map((user, index) => (
+                  {data && data?.map((user, index) => (
                     <tr key={index}>
                       <td>{user.name}</td>
                       <td>{user.date}</td>
